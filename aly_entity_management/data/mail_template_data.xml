@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="mail_template_reservation_confirmed" model="mail.template">
+        <field name="name">Real Estate: Reservation Confirmed</field>
+        <field name="model_id" ref="model_aly_entity_reservation"/>
+        <field name="subject">Your reservation {{ object.name }} is confirmed</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="lang">{{ object.partner_id.lang }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px;">
+    <p>Dear <t t-out="object.partner_id.name or ''">Customer</t>,</p>
+    <p>
+        Your reservation <strong t-out="object.name or ''">RES/2027/0001</strong> of unit
+        <strong t-out="object.unit_id.display_name or ''">A-101</strong> is confirmed.
+    </p>
+    <p>
+        It is valid until <strong t-out="format_date(object.expiry_date) or ''">01/01/2027</strong>.
+        We will send you the contract to sign shortly.
+    </p>
+    <p>Best regards,<br/><t t-out="object.company_id.name or ''">Company</t></p>
+</div>
+        </field>
+    </record>
+
+    <record id="mail_template_contract_signature" model="mail.template">
+        <field name="name">Real Estate: Contract to Sign</field>
+        <field name="model_id" ref="model_aly_entity_contract"/>
+        <field name="subject">Please sign your contract {{ object.name }}</field>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="lang">{{ object.partner_id.lang }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px;">
+    <p>Dear <t t-out="object.partner_id.name or ''">Customer</t>,</p>
+    <p>
+        Your contract <strong t-out="object.name or ''">CON/2027/0001</strong> for unit
+        <strong t-out="object.unit_id.display_name or ''">A-101</strong> is ready.
+        Its full value is <strong t-out="format_amount(object.total_amount, object.currency_id) or ''">62,500.00</strong>.
+    </p>
+    <p>Please review and sign it online before
+        <strong t-out="format_date(object.reservation_id.expiry_date) or ''">01/01/2027</strong>:</p>
+    <p style="margin: 16px 0px;">
+        <a t-att-href="object.get_base_url() + object.get_portal_url()"
+           style="background-color: #875A7B; padding: 8px 16px; color: #fff; border-radius: 5px; text-decoration: none;">
+            Review and Sign
+        </a>
+    </p>
+    <p>Best regards,<br/><t t-out="object.company_id.name or ''">Company</t></p>
+</div>
+        </field>
+    </record>
+
+</odoo>

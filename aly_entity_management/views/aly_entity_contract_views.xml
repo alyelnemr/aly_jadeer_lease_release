@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_contract_view_form" model="ir.ui.view">
+        <field name="name">aly.entity.contract.view.form</field>
+        <field name="model">aly.entity.contract</field>
+        <field name="arch" type="xml">
+            <form string="Contract" create="0">
+                <header>
+                    <button name="action_send_for_signature" type="object" string="Send for Signature" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_sign_in_office" type="object" string="Sign in Office" class="btn-primary"
+                            invisible="state != 'awaiting_signature'"/>
+                    <button name="action_back_to_draft" type="object" string="Back to Draft"
+                            invisible="state != 'awaiting_signature'"/>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                            invisible="state != 'signed'" groups="aly_entity_management.group_aly_entity_manager"/>
+                    <button name="action_print" type="object" string="Print"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('approved', 'cancelled')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,awaiting_signature,signed,approved"/>
+                </header>
+                <div class="alert alert-danger mb-0" role="alert" invisible="not partner_is_blacklisted">
+                    <strong>Blacklisted customer:</strong> <field name="partner_blacklist_reason" readonly="1"/>
+                </div>
+                <div class="alert alert-warning mb-0" role="alert" invisible="not conflict_warning">
+                    <field name="conflict_warning" readonly="1"/>
+                </div>
+                <div class="alert alert-info mb-0" role="alert" invisible="state != 'signed'">
+                    Signed by the customer: waiting for a manager to approve it.
+                </div>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-bookmark"
+                                context="{'aly_field': 'reservation_id'}" invisible="not reservation_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Reservation</span>
+                                <field name="reservation_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-home"
+                                context="{'aly_field': 'unit_id'}" invisible="not unit_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Unit</span>
+                                <field name="unit_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-building"
+                                context="{'aly_field': 'entity_id'}" invisible="not entity_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Property</span>
+                                <field name="entity_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-user"
+                                context="{'aly_field': 'partner_id'}" invisible="not partner_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Customer</span>
+                                <field name="partner_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_view_signed_contract" type="object" class="oe_stat_button" icon="fa-pencil"
+                                invisible="not signed_on">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="signed_by" readonly="1"/></span>
+                                <span class="o_stat_text"><field name="signed_on" widget="date" readonly="1"/></span>
+                            </div>
+                        </button>
+                        <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o"
+                                invisible="not invoice_count">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button name="action_view_payments" type="object" class="oe_stat_button" icon="fa-money" invisible="not received_payment_count">
+                            <field name="received_payment_count" widget="statinfo" string="Payments"/>
+                        </button>
+                        <button name="action_view_due_invoices" type="object" class="oe_stat_button" icon="fa-bell"
+                                invisible="not due_invoice_count">
+                            <field name="due_invoice_count" widget="statinfo" string="Due Invoices"/>
+                        </button>
+                        <button name="action_view_maintenance" type="object" class="oe_stat_button" icon="fa-wrench"
+                                invisible="state != 'approved'">
+                            <span class="o_stat_text">Maintenance</span>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="text-bg-danger" invisible="state != 'cancelled'"/>
+                    <widget name="web_ribbon" title="Period Ended" bg_color="text-bg-secondary" invisible="not is_period_ended"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h3><field name="contract_type" readonly="1"/></h3>
+                    </div>
+                    <group>
+                        <group string="Parties">
+                            <field name="reservation_id"/>
+                            <field name="partner_id"/>
+                            <field name="unit_id"/>
+                            <field name="entity_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Period and Payment">
+                            <field name="date_start" readonly="state != 'draft'"/>
+                            <label for="duration_value"/>
+                            <div class="o_row">
+                                <field name="duration_value" readonly="state != 'draft'" class="oe_inline"/>
+                                <field name="duration_unit" readonly="state != 'draft'" class="oe_inline"/>
+                            </div>
+                            <field name="date_end"/>
+                            <field name="payment_frequency" readonly="state != 'draft'"/>
+                            <field name="payment_count"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Value">
+                            <field name="currency_id" invisible="1"/>
+                            <field name="yearly_rent" readonly="state != 'draft'" invisible="contract_type != 'lease'"/>
+                            <field name="sale_price" readonly="state != 'draft'" invisible="contract_type != 'sale'"/>
+                            <field name="base_amount"/>
+                            <field name="service_fee" readonly="state != 'draft'"/>
+                            <field name="admin_fee" readonly="state != 'draft'"/>
+                            <field name="total_amount" class="fw-bold"/>
+                        </group>
+                        <group string="Tracking">
+                            <field name="sent_on" invisible="not sent_on"/>
+                            <field name="approved_by_id" invisible="not approved_by_id"/>
+                            <field name="approved_on" invisible="not approved_on"/>
+                            <field name="cancel_reason" invisible="state != 'cancelled'"/>
+                            <field name="is_period_ended" invisible="1"/>
+                            <field name="partner_is_blacklisted" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Invoices" name="invoices" invisible="state != 'approved'">
+                            <field name="invoice_ids" readonly="1">
+                                <list default_order="aly_installment_number" decoration-danger="aly_due_status == 'overdue'"
+                                      decoration-warning="aly_due_status == 'soon'"
+                                      decoration-muted="aly_due_status == 'done'">
+                                    <field name="aly_installment_number" string="#"/>
+                                    <field name="name"/>
+                                    <field name="aly_period_start"/>
+                                    <field name="aly_period_end"/>
+                                    <field name="aly_send_date"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="amount_total" sum="Total"/>
+                                    <field name="aly_due_status" widget="badge"
+                                           decoration-danger="aly_due_status == 'overdue'"
+                                           decoration-warning="aly_due_status == 'soon'"
+                                           decoration-success="aly_due_status == 'done'"/>
+                                    <field name="payment_state" widget="badge" optional="show"/>
+                                    <field name="state" column_invisible="True"/>
+                                    <button name="action_aly_post_and_send" type="object" string="Confirm &amp; Send"
+                                            icon="fa-paper-plane" invisible="state != 'draft' or aly_due_status == 'later'"/>
+                                    <button name="action_aly_post_and_send" type="object" string="Confirm &amp; Send Early"
+                                            icon="fa-paper-plane-o" invisible="state != 'draft' or aly_due_status != 'later'"
+                                            confirm="The planned send date of this invoice has not come yet. Confirm and send it now?"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Payment Schedule" name="schedule" invisible="state == 'approved'">
+                            <p class="text-muted">
+                                The invoices are created as drafts when a manager approves the contract.
+                                The first invoice also includes the service and administrative fees.
+                            </p>
+                        </page>
+                        <page string="Signature" name="signature" invisible="state in ('draft', 'awaiting_signature')">
+                            <group>
+                                <group>
+                                    <field name="signed_by" readonly="1"/>
+                                    <field name="signed_on" readonly="1"/>
+                                    <field name="signed_via" readonly="1"/>
+                                    <field name="signature_received_by_id" readonly="1" invisible="signed_via != 'office'"/>
+                                </group>
+                                <group>
+                                    <field name="signature" widget="image" readonly="1" nolabel="1"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_view_list" model="ir.ui.view">
+        <field name="name">aly.entity.contract.view.list</field>
+        <field name="model">aly.entity.contract</field>
+        <field name="arch" type="xml">
+            <list string="Contracts" create="0" decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="contract_type"/>
+                <field name="partner_id"/>
+                <field name="unit_id"/>
+                <field name="entity_id" optional="show"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="payment_frequency" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="total_amount" sum="Total"/>
+                <field name="is_period_ended" optional="show" widget="boolean" string="Ended"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'" decoration-warning="state == 'awaiting_signature'"
+                       decoration-primary="state == 'signed'" decoration-success="state == 'approved'"
+                       decoration-muted="state == 'cancelled'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_view_list_signatures" model="ir.ui.view">
+        <field name="name">aly.entity.contract.view.list.signatures</field>
+        <field name="model">aly.entity.contract</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Signatures" create="0">
+                <field name="name"/>
+                <field name="contract_type"/>
+                <field name="partner_id"/>
+                <field name="unit_id"/>
+                <field name="signed_by"/>
+                <field name="signed_on"/>
+                <field name="signed_via" widget="badge"
+                       decoration-info="signed_via == 'office'" decoration-success="signed_via == 'portal'"/>
+                <field name="signature_received_by_id" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="total_amount"/>
+                <field name="state" widget="badge"
+                       decoration-primary="state == 'signed'" decoration-success="state == 'approved'"
+                       decoration-muted="state == 'cancelled'"/>
+                <button name="action_view_signed_contract" type="object" string="Signed PDF" icon="fa-file-pdf-o"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_signature_action" model="ir.actions.act_window">
+        <field name="name">Signatures</field>
+        <field name="res_model">aly.entity.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'create': False}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('aly_entity_contract_view_list_signatures')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('aly_entity_contract_view_form')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No signed contracts yet</p>
+            <p>Contracts appear here once the customer signs them, in the office or in the portal.</p>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_view_search" model="ir.ui.view">
+        <field name="name">aly.entity.contract.view.search</field>
+        <field name="model">aly.entity.contract</field>
+        <field name="arch" type="xml">
+            <search string="Contracts">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="unit_id"/>
+                <field name="entity_id"/>
+                <filter name="filter_active" string="Not Cancelled" domain="[('state', '!=', 'cancelled')]"/>
+                <separator/>
+                <filter name="filter_to_approve" string="To Approve" domain="[('state', '=', 'signed')]"/>
+                <filter name="filter_waiting" string="Waiting Signature" domain="[('state', '=', 'awaiting_signature')]"/>
+                <filter name="filter_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <separator/>
+                <filter name="filter_lease" string="Lease" domain="[('contract_type', '=', 'lease')]"/>
+                <filter name="filter_sale" string="Sale" domain="[('contract_type', '=', 'sale')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_type" string="Contract Type" context="{'group_by': 'contract_type'}"/>
+                    <filter name="group_entity" string="Property" context="{'group_by': 'entity_id'}"/>
+                    <filter name="group_partner" string="Customer" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_action" model="ir.actions.act_window">
+        <field name="name">Contracts</field>
+        <field name="res_model">aly.entity.contract</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="aly_entity_contract_view_search"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No contracts yet</p>
+            <p>Contracts are created from confirmed reservations, signed by the customer and
+                approved by a manager.</p>
+        </field>
+    </record>
+
+</odoo>

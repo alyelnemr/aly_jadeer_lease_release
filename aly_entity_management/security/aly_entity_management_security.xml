@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_rule_company" model="ir.rule">
+        <field name="name">Property: multi-company</field>
+        <field name="model_id" ref="model_aly_entity"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="aly_entity_unit_rule_company" model="ir.rule">
+        <field name="name">Unit: multi-company</field>
+        <field name="model_id" ref="model_aly_entity_unit"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="aly_entity_unit_image_rule_company" model="ir.rule">
+        <field name="name">Unit photo: multi-company</field>
+        <field name="model_id" ref="model_aly_entity_unit_image"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="aly_entity_reservation_rule_company" model="ir.rule">
+        <field name="name">Reservation: multi-company</field>
+        <field name="model_id" ref="model_aly_entity_reservation"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="aly_entity_contract_rule_company" model="ir.rule">
+        <field name="name">Contract: multi-company</field>
+        <field name="model_id" ref="model_aly_entity_contract"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_rule_company" model="ir.rule">
+        <field name="name">Maintenance request: multi-company</field>
+        <field name="model_id" ref="model_aly_entity_maintenance_request"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_line_rule_company" model="ir.rule">
+        <field name="name">Maintenance request line: multi-company</field>
+        <field name="model_id" ref="model_aly_entity_maintenance_request_line"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="aly_entity_contract_value_report_rule_company" model="ir.rule">
+        <field name="name">Contract value report: multi-company</field>
+        <field name="model_id" ref="model_aly_entity_contract_value_report"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="aly_entity_reservation_rule_portal" model="ir.rule">
+        <field name="name">Reservation: portal customer sees own</field>
+        <field name="model_id" ref="model_aly_entity_reservation"/>
+        <field name="domain_force">[('partner_id', 'child_of', [user.commercial_partner_id.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+
+    <record id="aly_entity_contract_rule_portal" model="ir.rule">
+        <field name="name">Contract: portal customer sees own</field>
+        <field name="model_id" ref="model_aly_entity_contract"/>
+        <field name="domain_force">[('partner_id', 'child_of', [user.commercial_partner_id.id])]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
+
+</odoo>

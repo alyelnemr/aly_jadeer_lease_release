@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="aly_entity_menu_root"
+              name="Real Estate"
+              web_icon="aly_entity_management,static/description/icon.png"
+              action="aly_entity_unit_action"
+              groups="group_aly_entity_user"
+              sequence="40"/>
+
+    <menuitem id="aly_entity_menu_operations" name="Operations" parent="aly_entity_menu_root" sequence="10"/>
+    <menuitem id="aly_entity_reservation_menu" name="Reservations" parent="aly_entity_menu_operations"
+              action="aly_entity_reservation_action" sequence="10"/>
+    <menuitem id="aly_entity_contract_menu" name="Contracts" parent="aly_entity_menu_operations"
+              action="aly_entity_contract_action" sequence="20"/>
+    <menuitem id="aly_entity_invoice_to_send_menu" name="Invoices to Send" parent="aly_entity_menu_operations"
+              action="aly_entity_invoice_to_send_action" sequence="30"/>
+    <menuitem id="aly_entity_maintenance_request_menu" name="Maintenance Requests" parent="aly_entity_menu_operations"
+              action="aly_entity_maintenance_request_action" sequence="40"/>
+
+    <menuitem id="aly_entity_menu_properties" name="Properties" parent="aly_entity_menu_root" sequence="20"/>
+    <menuitem id="aly_entity_menu" name="Properties" parent="aly_entity_menu_properties"
+              action="aly_entity_action" sequence="10"/>
+    <menuitem id="aly_entity_unit_menu" name="Units" parent="aly_entity_menu_properties"
+              action="aly_entity_unit_action" sequence="20"/>
+    <menuitem id="aly_entity_customer_menu" name="Customers" parent="aly_entity_menu_properties"
+              action="res_partner_action_aly_customer" sequence="30"/>
+
+    <menuitem id="aly_entity_menu_reports" name="Reports" parent="aly_entity_menu_root" sequence="30"/>
+    <menuitem id="aly_entity_occupancy_report_menu" name="Unit Occupancy" parent="aly_entity_menu_reports"
+              action="aly_entity_unit_occupancy_action" sequence="10"/>
+    <menuitem id="aly_entity_contract_value_report_menu" name="Contract Value" parent="aly_entity_menu_reports"
+              action="aly_entity_contract_value_report_action" sequence="20"/>
+    <menuitem id="aly_entity_maintenance_hours_report_menu" name="Maintenance Hours" parent="aly_entity_menu_reports"
+              action="aly_entity_maintenance_request_line_action" sequence="30"/>
+
+    <menuitem id="aly_entity_menu_config" name="Configuration" parent="aly_entity_menu_root"
+              groups="group_aly_entity_manager" sequence="90"/>
+    <menuitem id="aly_entity_settings_menu" name="Settings" parent="aly_entity_menu_config"
+              action="aly_entity_settings_wizard_action" sequence="10"/>
+    <menuitem id="aly_entity_worker_menu" name="Maintenance Workers" parent="aly_entity_menu_config"
+              action="hr_employee_action_aly_worker" sequence="20"/>
+
+</odoo>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_settings_wizard_view_form" model="ir.ui.view">
+        <field name="name">aly.entity.settings.wizard.view.form</field>
+        <field name="model">aly.entity.settings.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Real Estate Settings">
+                <field name="company_id" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+                <group>
+                    <group string="Reservations and Reminders">
+                        <field name="aly_reservation_validity_days"/>
+                        <field name="aly_invoice_reminder_days"/>
+                    </group>
+                    <group string="Default Fees">
+                        <field name="aly_default_service_fee"/>
+                        <field name="aly_default_admin_fee"/>
+                    </group>
+                    <group string="Invoice Products">
+                        <field name="aly_rent_product_id"/>
+                        <field name="aly_sale_product_id"/>
+                        <field name="aly_service_fee_product_id"/>
+                        <field name="aly_admin_fee_product_id"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_apply" type="object" string="Save" class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="aly_entity_settings_wizard_action" model="ir.actions.act_window">
+        <field name="name">Real Estate Settings</field>
+        <field name="res_model">aly.entity.settings.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

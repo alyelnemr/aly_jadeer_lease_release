@@ -1,0 +1,47 @@
+.o_aly_card_image {
+    height: 160px;
+    overflow: hidden;
+    background-color: #f1f3f5;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.o_aly_unit_kanban .o_kanban_record,
+.o_aly_entity_kanban .o_kanban_record {
+    overflow: hidden;
+}
+
+.o_aly_gallery_image {
+    display: block;
+    height: 110px;
+    overflow: hidden;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.o_aly_carousel {
+    height: 380px;
+    border-radius: 0.5rem;
+    background-color: #f1f3f5;
+
+    .carousel-item {
+        height: 100%;
+    }
+}
+
+.o_aly_portal_card .o_aly_card_image {
+    height: 200px;
+}
+
+.o_portal_index_card .o_portal_icon img[src*="aly_entity_management"] {
+    width: 48px;
+    height: 48px;
+}

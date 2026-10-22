@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_unit_view_kanban" model="ir.ui.view">
+        <field name="name">aly.entity.unit.view.kanban</field>
+        <field name="model">aly.entity.unit</field>
+        <field name="arch" type="xml">
+            <kanban class="o_aly_unit_kanban" records_draggable="0" groups_draggable="0" sample="1">
+                <field name="id"/>
+                <field name="state"/>
+                <field name="is_for_rent"/>
+                <field name="is_for_sale"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card" class="p-0">
+                        <div class="o_aly_card_image position-relative">
+                            <field name="image_512" widget="image" options="{'img_class': 'object-fit-cover w-100 h-100'}"/>
+                            <span class="o_aly_state_badge badge position-absolute top-0 end-0 m-2"
+                                  t-att-class="{'text-bg-success': record.state.raw_value == 'available',
+                                                'text-bg-warning': record.state.raw_value == 'reserved',
+                                                'text-bg-info': record.state.raw_value == 'leased',
+                                                'text-bg-secondary': record.state.raw_value == 'sold'}">
+                                <field name="state"/>
+                            </span>
+                        </div>
+                        <div class="p-2">
+                            <div class="fw-bold fs-5">
+                                <field name="name"/> · <field name="entity_id"/>
+                            </div>
+                            <div class="text-muted">
+                                <field name="unit_type"/> · <field name="floor"/>
+                            </div>
+                            <div class="text-muted">
+                                <field name="area"/> m² · <field name="rooms"/> rooms
+                            </div>
+                            <div t-if="record.is_for_rent.raw_value" class="mt-1">
+                                Rent: <field name="yearly_rent" widget="monetary"/> / year
+                            </div>
+                            <div t-if="record.is_for_sale.raw_value">
+                                Sale: <field name="sale_price" widget="monetary"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="aly_entity_unit_view_form" model="ir.ui.view">
+        <field name="name">aly.entity.unit.view.form</field>
+        <field name="model">aly.entity.unit</field>
+        <field name="arch" type="xml">
+            <form string="Unit">
+                <header>
+                    <button name="action_reserve" type="object" string="Reserve this Unit" class="btn-primary"
+                            invisible="state == 'sold' or not id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="available,reserved,leased,sold"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-building"
+                                context="{'aly_field': 'entity_id'}" invisible="not entity_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Property</span>
+                                <field name="entity_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-bookmark">
+                            <field name="reservation_count" widget="statinfo" string="Reservations"/>
+                        </button>
+                        <button name="action_view_contracts" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="contract_count" widget="statinfo" string="Contracts"/>
+                        </button>
+                        <button name="action_view_maintenance" type="object" class="oe_stat_button" icon="fa-wrench">
+                            <field name="maintenance_count" widget="statinfo" string="Maintenance"/>
+                        </button>
+                        <button name="action_view_signatures" type="object" class="oe_stat_button" icon="fa-pencil">
+                            <field name="signature_count" widget="statinfo" string="Signatures"/>
+                        </button>
+                        <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button name="action_view_payments" type="object" class="oe_stat_button" icon="fa-money">
+                            <field name="payment_count" widget="statinfo" string="Payments"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. A-101"/></h1>
+                        <h3><field name="entity_id" placeholder="Property"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="unit_type"/>
+                            <field name="floor"/>
+                            <field name="area"/>
+                            <field name="rooms"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="is_for_rent"/>
+                            <field name="yearly_rent" invisible="not is_for_rent" required="is_for_rent"/>
+                            <field name="is_for_sale"/>
+                            <field name="sale_price" invisible="not is_for_sale" required="is_for_sale"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Gallery" name="gallery">
+                            <field name="image_ids" mode="kanban" context="{'default_unit_id': id}">
+                                <kanban>
+                                    <field name="id"/>
+                                    <templates>
+                                        <t t-name="card" class="p-0">
+                                            <field name="image_512" widget="image" class="o_aly_gallery_image"
+                                                   options="{'img_class': 'object-fit-cover w-100 h-100'}"/>
+                                            <field name="name" class="p-1 text-center"/>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                                <form string="Photo">
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="sequence"/>
+                                        <field name="image_1920" widget="image"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Occupancy" name="occupancy">
+                            <separator string="Approved Contracts (running or upcoming)"/>
+                            <field name="occupancy_contract_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="contract_type"/>
+                                    <field name="partner_id"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                            <separator string="Active Reservations (do not block other reservations)"/>
+                            <field name="occupancy_reservation_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="contract_type"/>
+                                    <field name="partner_id"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="aly_entity_unit_view_list" model="ir.ui.view">
+        <field name="name">aly.entity.unit.view.list</field>
+        <field name="model">aly.entity.unit</field>
+        <field name="arch" type="xml">
+            <list string="Units">
+                <field name="name"/>
+                <field name="entity_id"/>
+                <field name="unit_type"/>
+                <field name="floor"/>
+                <field name="area"/>
+                <field name="rooms" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="yearly_rent"/>
+                <field name="sale_price" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'available'" decoration-warning="state == 'reserved'"
+                       decoration-info="state == 'leased'" decoration-muted="state == 'sold'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_unit_view_search" model="ir.ui.view">
+        <field name="name">aly.entity.unit.view.search</field>
+        <field name="model">aly.entity.unit</field>
+        <field name="arch" type="xml">
+            <search string="Units">
+                <field name="name"/>
+                <field name="entity_id"/>
+                <filter name="filter_available" string="Available" domain="[('state', '=', 'available')]"/>
+                <filter name="filter_reserved" string="Reserved" domain="[('state', '=', 'reserved')]"/>
+                <filter name="filter_leased" string="Leased" domain="[('state', '=', 'leased')]"/>
+                <filter name="filter_sold" string="Sold" domain="[('state', '=', 'sold')]"/>
+                <separator/>
+                <filter name="filter_for_rent" string="For Rent" domain="[('is_for_rent', '=', True)]"/>
+                <filter name="filter_for_sale" string="For Sale" domain="[('is_for_sale', '=', True)]"/>
+                <separator/>
+                <filter name="filter_residential" string="Residential" domain="[('unit_type', '=', 'residential')]"/>
+                <filter name="filter_commercial" string="Commercial" domain="[('unit_type', '=', 'commercial')]"/>
+                <separator/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_entity" string="Property" context="{'group_by': 'entity_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_type" string="Unit Type" context="{'group_by': 'unit_type'}"/>
+                    <filter name="group_floor" string="Floor" context="{'group_by': 'floor'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="aly_entity_unit_action" model="ir.actions.act_window">
+        <field name="name">Units</field>
+        <field name="res_model">aly.entity.unit</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="aly_entity_unit_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first unit</p>
+            <p>Units are the apartments, villas, shops and offices of your properties. Their
+                status (available, reserved, leased, sold) is computed by the system.</p>
+        </field>
+    </record>
+
+    <record id="aly_entity_unit_view_pivot" model="ir.ui.view">
+        <field name="name">aly.entity.unit.view.pivot</field>
+        <field name="model">aly.entity.unit</field>
+        <field name="arch" type="xml">
+            <pivot string="Unit Occupancy" sample="1">
+                <field name="entity_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="aly_entity_unit_view_graph" model="ir.ui.view">
+        <field name="name">aly.entity.unit.view.graph</field>
+        <field name="model">aly.entity.unit</field>
+        <field name="arch" type="xml">
+            <graph string="Unit Occupancy" type="bar" stacked="1" sample="1">
+                <field name="entity_id"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="aly_entity_unit_occupancy_action" model="ir.actions.act_window">
+        <field name="name">Unit Occupancy</field>
+        <field name="res_model">aly.entity.unit</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="search_view_id" ref="aly_entity_unit_view_search"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('aly_entity_unit_view_graph')}),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('aly_entity_unit_view_pivot')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('aly_entity_unit_view_list')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No units yet</p>
+            <p>How many units are available, reserved, leased or sold, per property.</p>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_cancel_wizard_view_form" model="ir.ui.view">
+        <field name="name">aly.entity.cancel.wizard.view.form</field>
+        <field name="model">aly.entity.cancel.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reason">
+                <field name="res_model" invisible="1"/>
+                <field name="res_ids" invisible="1"/>
+                <field name="is_send_back" invisible="1"/>
+                <group>
+                    <field name="reason" placeholder="Explain why..."/>
+                </group>
+                <footer>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

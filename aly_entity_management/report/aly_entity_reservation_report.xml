@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_aly_entity_reservation" model="ir.actions.report">
+        <field name="name">Reservation</field>
+        <field name="model">aly.entity.reservation</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">aly_entity_management.report_aly_entity_reservation</field>
+        <field name="report_file">aly_entity_management.report_aly_entity_reservation</field>
+        <field name="print_report_name">'Reservation - %s' % (object.name or '').replace('/', '_')</field>
+        <field name="binding_model_id" ref="model_aly_entity_reservation"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_aly_entity_reservation_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+            <div class="page">
+                <h2>Reservation <span t-field="o.name"/></h2>
+                <table class="table table-sm o_main_table mt-4">
+                    <tbody>
+                        <tr><td>Customer</td><td><span t-field="o.partner_id.name"/></td></tr>
+                        <tr><td>Unit</td><td><span t-field="o.unit_id.name"/> - <span t-field="o.entity_id.name"/></td></tr>
+                        <tr><td>Type</td><td><span t-field="o.contract_type"/></td></tr>
+                        <tr>
+                            <td>Period</td>
+                            <td><span t-field="o.date_start"/><t t-if="o.date_end"> - <span t-field="o.date_end"/></t></td>
+                        </tr>
+                        <tr><td>Status</td><td><span t-field="o.state"/></td></tr>
+                        <tr t-if="o.expiry_date"><td>Valid until</td><td><span t-field="o.expiry_date"/></td></tr>
+                        <tr t-if="o.contract_type == 'lease'"><td>Yearly rent of the unit</td><td><span t-field="o.unit_yearly_rent"/></td></tr>
+                        <tr t-if="o.contract_type == 'sale'"><td>Sale price of the unit</td><td><span t-field="o.unit_sale_price"/></td></tr>
+                    </tbody>
+                </table>
+                <p class="text-muted">The binding document is the contract, which the customer signs.</p>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_aly_entity_reservation">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="aly_entity_management.report_aly_entity_reservation_document" t-lang="o.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+</odoo>

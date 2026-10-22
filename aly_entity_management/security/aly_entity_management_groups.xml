@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="module_category_aly_entity_management" model="ir.module.category">
+        <field name="name">Real Estate</field>
+        <field name="description">Properties, units, reservations, contracts and maintenance hours.</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="group_aly_entity_user" model="res.groups">
+        <field name="name">Employee</field>
+        <field name="category_id" ref="module_category_aly_entity_management"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('base.group_partner_manager')), (4, ref('account.group_account_invoice'))]"/>
+        <field name="comment">Manages properties, units, customers, reservations and contracts,
+            sends contracts for signature, confirms invoices and records maintenance hours.</field>
+    </record>
+
+    <record id="group_aly_entity_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="module_category_aly_entity_management"/>
+        <field name="implied_ids" eval="[(4, ref('group_aly_entity_user'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Everything an employee does, plus approving contracts, editing the
+            real estate settings and deleting drafts.</field>
+    </record>
+
+</odoo>

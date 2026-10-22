@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_reservation_view_form" model="ir.ui.view">
+        <field name="name">aly.entity.reservation.view.form</field>
+        <field name="model">aly.entity.reservation</field>
+        <field name="arch" type="xml">
+            <form string="Reservation">
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_create_contract" type="object" string="Create Contract" class="btn-primary"
+                            invisible="state != 'confirmed' or contract_id"/>
+                    <button name="action_view_contract" type="object" string="Open Contract"
+                            invisible="not contract_id"/>
+                    <button name="action_print" type="object" string="Print"
+                            invisible="state == 'draft'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('contracted', 'cancelled', 'expired')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,awaiting_signature,signed,contracted"/>
+                </header>
+                <div class="alert alert-danger mb-0" role="alert" invisible="not partner_is_blacklisted">
+                    <strong>Blacklisted customer:</strong> <field name="partner_blacklist_reason" readonly="1"/>
+                </div>
+                <div class="alert alert-warning mb-0" role="alert" invisible="not conflict_warning">
+                    <field name="conflict_warning" readonly="1"/>
+                </div>
+                <div class="alert alert-info mb-0" role="alert" invisible="not is_portal_request or state != 'draft'">
+                    Requested by the customer from the portal: review it and confirm.
+                </div>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_contract" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                invisible="not contract_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Contract</span>
+                                <field name="contract_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-home"
+                                context="{'aly_field': 'unit_id'}" invisible="not unit_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Unit</span>
+                                <field name="unit_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-building"
+                                context="{'aly_field': 'entity_id'}" invisible="not entity_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Property</span>
+                                <field name="entity_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-user"
+                                context="{'aly_field': 'partner_id'}" invisible="not partner_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Customer</span>
+                                <field name="partner_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o" invisible="not invoice_count">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Cancelled" bg_color="text-bg-danger" invisible="state != 'cancelled'"/>
+                    <widget name="web_ribbon" title="Expired" bg_color="text-bg-warning" invisible="state != 'expired'"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="state != 'draft'"
+                                   context="{'form_view_ref': 'aly_entity_management.res_partner_view_form_aly_customer'}"/>
+                            <field name="unit_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="entity_id"/>
+                            <field name="contract_type" readonly="state != 'draft'" widget="radio" options="{'horizontal': true}"/>
+                        </group>
+                        <group>
+                            <field name="date_start" readonly="state != 'draft'"/>
+                            <field name="date_end" readonly="state != 'draft'"
+                                   invisible="contract_type != 'lease'" required="contract_type == 'lease'"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="unit_yearly_rent" invisible="contract_type != 'lease'"/>
+                            <field name="unit_sale_price" invisible="contract_type != 'sale'"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group string="Tracking" invisible="state == 'draft'">
+                        <group>
+                            <field name="confirmed_by_id"/>
+                            <field name="confirmed_on"/>
+                        </group>
+                        <group>
+                            <field name="expiry_date" invisible="state not in ('confirmed', 'awaiting_signature')"/>
+                            <field name="cancel_reason" invisible="state not in ('cancelled', 'expired')"/>
+                            <field name="is_portal_request" invisible="1"/>
+                            <field name="partner_is_blacklisted" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="aly_entity_reservation_view_list" model="ir.ui.view">
+        <field name="name">aly.entity.reservation.view.list</field>
+        <field name="model">aly.entity.reservation</field>
+        <field name="arch" type="xml">
+            <list string="Reservations" decoration-muted="state in ('cancelled', 'expired')"
+                  decoration-info="state == 'draft'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="unit_id"/>
+                <field name="entity_id" optional="show"/>
+                <field name="contract_type"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="expiry_date" optional="show"/>
+                <field name="is_portal_request" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'" decoration-warning="state in ('confirmed', 'awaiting_signature')"
+                       decoration-primary="state == 'signed'" decoration-success="state == 'contracted'"
+                       decoration-muted="state in ('cancelled', 'expired')"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_reservation_view_calendar" model="ir.ui.view">
+        <field name="name">aly.entity.reservation.view.calendar</field>
+        <field name="model">aly.entity.reservation</field>
+        <field name="arch" type="xml">
+            <calendar string="Reservations" date_start="date_start" date_stop="date_end" color="unit_id"
+                      mode="month" quick_create="0" event_open_popup="0">
+                <field name="partner_id"/>
+                <field name="unit_id"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="aly_entity_reservation_view_search" model="ir.ui.view">
+        <field name="name">aly.entity.reservation.view.search</field>
+        <field name="model">aly.entity.reservation</field>
+        <field name="arch" type="xml">
+            <search string="Reservations">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="unit_id"/>
+                <field name="entity_id"/>
+                <filter name="filter_active" string="Not Cancelled"
+                        domain="[('state', 'not in', ('cancelled', 'expired'))]"/>
+                <separator/>
+                <filter name="filter_draft" string="To Confirm" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_portal" string="From Portal" domain="[('is_portal_request', '=', True)]"/>
+                <filter name="filter_waiting" string="Waiting Signature" domain="[('state', '=', 'awaiting_signature')]"/>
+                <filter name="filter_signed" string="Signed" domain="[('state', '=', 'signed')]"/>
+                <separator/>
+                <filter name="filter_lease" string="Lease" domain="[('contract_type', '=', 'lease')]"/>
+                <filter name="filter_sale" string="Sale" domain="[('contract_type', '=', 'sale')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_entity" string="Property" context="{'group_by': 'entity_id'}"/>
+                    <filter name="group_unit" string="Unit" context="{'group_by': 'unit_id'}"/>
+                    <filter name="group_partner" string="Customer" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="aly_entity_reservation_action" model="ir.actions.act_window">
+        <field name="name">Reservations</field>
+        <field name="res_model">aly.entity.reservation</field>
+        <field name="view_mode">list,form,calendar</field>
+        <field name="search_view_id" ref="aly_entity_reservation_view_search"/>
+        <field name="context">{'search_default_filter_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create the first reservation</p>
+            <p>A reservation holds a unit for a customer for a period. Several customers can
+                reserve the same unit; the first contract approved wins.</p>
+        </field>
+    </record>
+
+</odoo>

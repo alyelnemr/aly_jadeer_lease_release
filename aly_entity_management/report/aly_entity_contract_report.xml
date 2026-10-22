@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_aly_entity_contract" model="ir.actions.report">
+        <field name="name">Contract</field>
+        <field name="model">aly.entity.contract</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">aly_entity_management.report_aly_entity_contract</field>
+        <field name="report_file">aly_entity_management.report_aly_entity_contract</field>
+        <field name="print_report_name">'Contract - %s' % (object.name or '').replace('/', '_')</field>
+        <field name="binding_model_id" ref="model_aly_entity_contract"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_aly_entity_contract_document">
+        <t t-call="web.external_layout">
+            <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
+            <div class="page">
+                <h2>
+                    <span t-if="o.contract_type == 'lease'">Lease Contract</span>
+                    <span t-else="">Sale Contract</span>
+                    <span t-field="o.name"/>
+                </h2>
+
+                <div class="row mt-4 mb-4">
+                    <div class="col-6">
+                        <strong>Customer</strong>
+                        <div t-field="o.partner_id.name"/>
+                        <div t-if="o.partner_id.identity_type">
+                            <span t-field="o.partner_id.identity_type"/>: <span t-field="o.partner_id.identity_number"/>
+                        </div>
+                        <div t-if="o.partner_id.mobile" t-field="o.partner_id.mobile"/>
+                    </div>
+                    <div class="col-6">
+                        <strong>Unit</strong>
+                        <div><span t-field="o.unit_id.name"/> - <span t-field="o.entity_id.name"/></div>
+                        <div><span t-field="o.unit_id.unit_type"/>, <span t-field="o.unit_id.floor"/>,
+                            <span t-field="o.unit_id.area"/> m²</div>
+                        <div t-if="o.entity_id.city" t-field="o.entity_id.city"/>
+                    </div>
+                </div>
+
+                <table class="table table-sm o_main_table">
+                    <tbody>
+                        <tr>
+                            <td t-if="o.contract_type == 'lease'">Period</td>
+                            <td t-else="">Handover date / installment plan</td>
+                            <td class="text-end">
+                                <span t-field="o.date_start"/> - <span t-field="o.date_end"/>
+                                (<span t-field="o.duration_months"/> months)
+                            </td>
+                        </tr>
+                        <tr t-if="o.contract_type == 'lease'">
+                            <td>Yearly rent</td>
+                            <td class="text-end"><span t-field="o.yearly_rent"/></td>
+                        </tr>
+                        <tr>
+                            <td t-if="o.contract_type == 'lease'">Rent for the whole period</td>
+                            <td t-else="">Sale price</td>
+                            <td class="text-end"><span t-field="o.base_amount"/></td>
+                        </tr>
+                        <tr>
+                            <td>Service fee</td>
+                            <td class="text-end"><span t-field="o.service_fee"/></td>
+                        </tr>
+                        <tr>
+                            <td>Administrative fee</td>
+                            <td class="text-end"><span t-field="o.admin_fee"/></td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td>Full contract value</td>
+                            <td class="text-end"><span t-field="o.total_amount"/></td>
+                        </tr>
+                        <tr>
+                            <td>Payment</td>
+                            <td class="text-end">
+                                <span t-field="o.payment_frequency"/>, <span t-field="o.payment_count"/> payment(s)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h5 class="mt-4">Payment schedule</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Period</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="o._aly_get_installments()" t-as="inst">
+                            <tr>
+                                <td t-out="inst['number']"/>
+                                <td><t t-out="inst['date_start']" t-options="{'widget': 'date'}"/> - <t t-out="inst['date_end']" t-options="{'widget': 'date'}"/></td>
+                                <td class="text-end">
+                                    <t t-set="fees" t-value="(o.service_fee + o.admin_fee) if inst['number'] == 1 else 0"/>
+                                    <t t-out="inst['amount'] + fees" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+                <p class="text-muted small">The first payment includes the service and administrative fees.</p>
+
+                <div class="row mt-5">
+                    <div class="col-6">
+                        <strong>Customer signature</strong>
+                        <div t-if="o.signature">
+                            <img t-att-src="image_data_uri(o.signature)" style="max-height: 4cm; max-width: 8cm;"/>
+                            <div>
+                                <span t-field="o.signed_by"/> - <span t-field="o.signed_on"/>
+                                (<span t-field="o.signed_via"/>)
+                            </div>
+                        </div>
+                        <div t-else="" class="text-muted">Not signed yet</div>
+                    </div>
+                    <div class="col-6">
+                        <strong>Approved by</strong>
+                        <div t-if="o.approved_by_id">
+                            <span t-field="o.approved_by_id.name"/> - <span t-field="o.approved_on"/>
+                        </div>
+                        <div t-else="" class="text-muted">Waiting for manager approval</div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_aly_entity_contract">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="aly_entity_management.report_aly_entity_contract_document" t-lang="o.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+</odoo>

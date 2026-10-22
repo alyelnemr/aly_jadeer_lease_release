@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="account_move_view_form_inherit_aly_entity" model="ir.ui.view">
+        <field name="name">account.move.view.form.inherit.aly.entity</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <field name="aly_due_status" invisible="1"/>
+                <div class="alert alert-info mb-0" role="alert" invisible="aly_due_status != 'later'">
+                    This contract invoice is planned to be sent on
+                    <field name="aly_send_date" readonly="1" class="fw-bold"/>.
+                    Confirming it now sends it early.
+                </div>
+                <div class="alert alert-danger mb-0" role="alert" invisible="aly_due_status != 'overdue'">
+                    This contract invoice should have been sent on
+                    <field name="aly_send_date" readonly="1" class="fw-bold"/>.
+                </div>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <field name="aly_contract_id" invisible="1"/>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                context="{'aly_field': 'aly_contract_id'}" invisible="not aly_contract_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Contract</span>
+                                <field name="aly_contract_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-bookmark"
+                                context="{'aly_field': 'aly_reservation_id'}" invisible="not aly_reservation_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Reservation</span>
+                                <field name="aly_reservation_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-home"
+                                context="{'aly_field': 'aly_unit_id'}" invisible="not aly_unit_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Unit</span>
+                                <field name="aly_unit_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-building"
+                                context="{'aly_field': 'aly_entity_id'}" invisible="not aly_entity_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Property</span>
+                                <field name="aly_entity_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-user"
+                        context="{'aly_field': 'partner_id'}" invisible="not aly_contract_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Customer</span>
+                        <field name="partner_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//page[@id='other_tab']/group[@id='other_tab_group']" position="before">
+                <group string="Real Estate Contract" invisible="not aly_contract_id">
+                    <group>
+                        <field name="aly_contract_id"/>
+                        <field name="aly_unit_id"/>
+                        <label for="aly_installment_number"/>
+                        <div class="o_row">
+                            <field name="aly_installment_number" class="oe_inline"/> /
+                            <field name="aly_installment_count" class="oe_inline"/>
+                        </div>
+                    </group>
+                    <group>
+                        <field name="aly_period_start"/>
+                        <field name="aly_period_end"/>
+                        <field name="aly_send_date"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="account_move_view_search_inherit_aly_entity" model="ir.ui.view">
+        <field name="name">account.move.view.search.inherit.aly.entity</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="after">
+                <field name="aly_contract_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='draft']" position="before">
+                <filter name="filter_aly_overdue" string="Overdue to Send"
+                        domain="[('state', '=', 'draft'), ('aly_send_date', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="filter_due" string="To Send This Week"
+                        domain="[('state', '=', 'draft'), ('aly_send_date', '&lt;=', (context_today() + relativedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <filter name="group_aly_contract" string="Real Estate Contract" context="{'group_by': 'aly_contract_id'}"/>
+                <filter name="group_aly_entity" string="Property" context="{'group_by': 'aly_entity_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="account_move_view_list_aly_to_send" model="ir.ui.view">
+        <field name="name">account.move.view.list.aly.to.send</field>
+        <field name="model">account.move</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Invoices to Send" create="0" default_order="aly_send_date, id"
+                  decoration-danger="aly_due_status == 'overdue'"
+                  decoration-warning="aly_due_status == 'soon'"
+                  decoration-muted="aly_due_status == 'done'">
+                <field name="aly_send_date"/>
+                <field name="aly_due_status" widget="badge"
+                       decoration-danger="aly_due_status == 'overdue'"
+                       decoration-warning="aly_due_status == 'soon'"
+                       decoration-success="aly_due_status == 'done'"/>
+                <field name="partner_id"/>
+                <field name="aly_contract_id"/>
+                <field name="aly_unit_id" optional="show"/>
+                <field name="aly_installment_number" string="Payment #"/>
+                <field name="aly_installment_count" string="of"/>
+                <field name="aly_period_start" optional="show"/>
+                <field name="aly_period_end" optional="show"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="state" column_invisible="True"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <button name="action_aly_post_and_send" type="object" string="Confirm &amp; Send"
+                        icon="fa-paper-plane" class="btn-primary"
+                        invisible="state != 'draft' or aly_due_status == 'later'"/>
+                <button name="action_aly_post_and_send" type="object" string="Confirm &amp; Send Early"
+                        icon="fa-paper-plane-o" invisible="state != 'draft' or aly_due_status != 'later'"
+                        confirm="The planned send date of this invoice has not come yet. Confirm and send it now?"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_invoice_to_send_action" model="ir.actions.act_window">
+        <field name="name">Invoices to Send</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('aly_contract_id', '!=', False), ('state', '=', 'draft'), ('move_type', '=', 'out_invoice')]</field>
+        <field name="context">{'create': False, 'default_move_type': 'out_invoice'}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('account_move_view_list_aly_to_send')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('account.view_move_form')})]"/>
+        <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Nothing to send</p>
+            <p>Draft invoices of approved contracts appear here, red when overdue and orange
+                when due soon. Confirm each one on its planned send date.</p>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_invoice_action" model="ir.actions.act_window">
+        <field name="name">Contract Invoices</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('aly_contract_id', '!=', False)]</field>
+        <field name="context">{'create': False, 'default_move_type': 'out_invoice'}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('account_move_view_list_aly_to_send')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('account.view_move_form')})]"/>
+        <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No contract invoices yet</p>
+            <p>Invoices are created as drafts, one per payment period, when a manager approves a contract.</p>
+        </field>
+    </record>
+
+</odoo>

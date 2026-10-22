@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="product_aly_rent" model="product.product">
+        <field name="name">Rent</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+        <field name="description_sale">Rent of a real estate unit for a contract period.</field>
+    </record>
+
+    <record id="product_aly_sale" model="product.product">
+        <field name="name">Unit Sale Installment</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+        <field name="description_sale">Installment of the sale price of a real estate unit.</field>
+    </record>
+
+    <record id="product_aly_service_fee" model="product.product">
+        <field name="name">Service Fee</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+    </record>
+
+    <record id="product_aly_admin_fee" model="product.product">
+        <field name="name">Administrative Fee</field>
+        <field name="type">service</field>
+        <field name="list_price">0</field>
+        <field name="sale_ok" eval="True"/>
+        <field name="purchase_ok" eval="False"/>
+        <field name="taxes_id" eval="[(5, 0, 0)]"/>
+    </record>
+
+</odoo>

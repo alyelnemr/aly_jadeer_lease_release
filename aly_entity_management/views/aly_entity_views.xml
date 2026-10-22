@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_view_kanban" model="ir.ui.view">
+        <field name="name">aly.entity.view.kanban</field>
+        <field name="model">aly.entity</field>
+        <field name="arch" type="xml">
+            <kanban class="o_aly_entity_kanban" sample="1">
+                <field name="id"/>
+                <field name="available_count"/>
+                <field name="unit_count"/>
+                <templates>
+                    <t t-name="card" class="p-0">
+                        <div class="o_aly_card_image">
+                            <field name="image_512" widget="image" options="{'img_class': 'object-fit-cover w-100 h-100'}"/>
+                        </div>
+                        <div class="p-2">
+                            <field name="name" class="fw-bold fs-5"/>
+                            <div class="text-muted">
+                                <field name="code"/> · <field name="city"/>
+                            </div>
+                            <div class="mt-1">
+                                <field name="entity_type"/>
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge text-bg-success">
+                                    <t t-out="record.available_count.raw_value"/> available of <t t-out="record.unit_count.raw_value"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="aly_entity_view_form" model="ir.ui.view">
+        <field name="name">aly.entity.view.form</field>
+        <field name="model">aly.entity</field>
+        <field name="arch" type="xml">
+            <form string="Property">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_units" type="object" class="oe_stat_button" icon="fa-building">
+                            <field name="unit_count" widget="statinfo" string="Units"/>
+                        </button>
+                        <button name="action_view_available_units" type="object" class="oe_stat_button" icon="fa-check-circle">
+                            <field name="available_count" widget="statinfo" string="Available"/>
+                        </button>
+                        <button name="action_view_reserved_units" type="object" class="oe_stat_button" icon="fa-bookmark">
+                            <field name="reserved_count" widget="statinfo" string="Reserved"/>
+                        </button>
+                        <button name="action_view_leased_units" type="object" class="oe_stat_button" icon="fa-key">
+                            <field name="leased_count" widget="statinfo" string="Leased"/>
+                        </button>
+                        <button name="action_view_sold_units" type="object" class="oe_stat_button" icon="fa-handshake-o">
+                            <field name="sold_count" widget="statinfo" string="Sold"/>
+                        </button>
+                        <button name="action_view_reservations" type="object" class="oe_stat_button" icon="fa-bookmark">
+                            <field name="reservation_count" widget="statinfo" string="Reservations"/>
+                        </button>
+                        <button name="action_view_contracts" type="object" class="oe_stat_button" icon="fa-file-text-o">
+                            <field name="contract_count" widget="statinfo" string="Contracts"/>
+                        </button>
+                        <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
+                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button name="action_view_maintenance" type="object" class="oe_stat_button" icon="fa-wrench">
+                            <field name="maintenance_count" widget="statinfo" string="Maintenance"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="e.g. Al Nakheel Tower"/></h1>
+                        <h3><field name="code" placeholder="e.g. NKH"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="entity_type"/>
+                            <field name="manager_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="street"/>
+                            <field name="city"/>
+                            <field name="country_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Units" name="units">
+                            <field name="unit_ids" context="{'default_entity_id': id}">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="unit_type"/>
+                                    <field name="floor"/>
+                                    <field name="area"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="yearly_rent"/>
+                                    <field name="sale_price" optional="show"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'available'" decoration-warning="state == 'reserved'"
+                                           decoration-info="state == 'leased'" decoration-muted="state == 'sold'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="aly_entity_view_list" model="ir.ui.view">
+        <field name="name">aly.entity.view.list</field>
+        <field name="model">aly.entity</field>
+        <field name="arch" type="xml">
+            <list string="Properties">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="entity_type"/>
+                <field name="city"/>
+                <field name="manager_id"/>
+                <field name="unit_count"/>
+                <field name="available_count"/>
+                <field name="leased_count"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_view_search" model="ir.ui.view">
+        <field name="name">aly.entity.view.search</field>
+        <field name="model">aly.entity</field>
+        <field name="arch" type="xml">
+            <search string="Properties">
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]"/>
+                <field name="city"/>
+                <field name="manager_id"/>
+                <filter name="filter_has_available" string="Has Available Units"
+                        domain="[('unit_ids.state', '=', 'available')]"/>
+                <separator/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_type" string="Property Type" context="{'group_by': 'entity_type'}"/>
+                    <filter name="group_city" string="City" context="{'group_by': 'city'}"/>
+                    <filter name="group_manager" string="Property Manager" context="{'group_by': 'manager_id'}"/>
+                    <filter name="group_company" string="Company" context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="aly_entity_action" model="ir.actions.act_window">
+        <field name="name">Properties</field>
+        <field name="res_model">aly.entity</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="aly_entity_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first property</p>
+            <p>A property (tower, compound, building) groups the residential and commercial
+                units you lease and sell.</p>
+        </field>
+    </record>
+
+</odoo>

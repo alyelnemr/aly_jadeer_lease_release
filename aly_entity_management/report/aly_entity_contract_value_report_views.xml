@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_contract_value_report_view_pivot" model="ir.ui.view">
+        <field name="name">aly.entity.contract.value.report.view.pivot</field>
+        <field name="model">aly.entity.contract.value.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Contract Value" sample="1">
+                <field name="entity_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="contract_value" type="measure"/>
+                <field name="annual_value" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_value_report_view_graph" model="ir.ui.view">
+        <field name="name">aly.entity.contract.value.report.view.graph</field>
+        <field name="model">aly.entity.contract.value.report</field>
+        <field name="arch" type="xml">
+            <graph string="Contract Value" type="bar" stacked="1" sample="1">
+                <field name="entity_id"/>
+                <field name="state"/>
+                <field name="annual_value" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_value_report_view_list" model="ir.ui.view">
+        <field name="name">aly.entity.contract.value.report.view.list</field>
+        <field name="model">aly.entity.contract.value.report</field>
+        <field name="arch" type="xml">
+            <list string="Contract Value">
+                <field name="entity_id"/>
+                <field name="unit_id"/>
+                <field name="unit_type"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'available'" decoration-warning="state == 'reserved'"
+                       decoration-info="state == 'leased'" decoration-muted="state == 'sold'"/>
+                <field name="partner_id"/>
+                <field name="contract_id"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="contract_value" sum="Total"/>
+                <field name="annual_value" sum="Total"/>
+                <field name="potential_value" sum="Total" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_value_report_view_search" model="ir.ui.view">
+        <field name="name">aly.entity.contract.value.report.view.search</field>
+        <field name="model">aly.entity.contract.value.report</field>
+        <field name="arch" type="xml">
+            <search string="Contract Value">
+                <field name="unit_id"/>
+                <field name="entity_id"/>
+                <field name="partner_id"/>
+                <filter name="filter_available" string="Available" domain="[('state', '=', 'available')]"/>
+                <filter name="filter_reserved" string="Reserved" domain="[('state', '=', 'reserved')]"/>
+                <filter name="filter_leased" string="Leased" domain="[('state', '=', 'leased')]"/>
+                <filter name="filter_sold" string="Sold" domain="[('state', '=', 'sold')]"/>
+                <separator/>
+                <filter name="filter_residential" string="Residential" domain="[('unit_type', '=', 'residential')]"/>
+                <filter name="filter_commercial" string="Commercial" domain="[('unit_type', '=', 'commercial')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_entity" string="Property" context="{'group_by': 'entity_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_type" string="Unit Type" context="{'group_by': 'unit_type'}"/>
+                    <filter name="group_company" string="Company" context="{'group_by': 'company_id'}"
+                            groups="base.group_multi_company"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="aly_entity_contract_value_report_action" model="ir.actions.act_window">
+        <field name="name">Contract Value</field>
+        <field name="res_model">aly.entity.contract.value.report</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="search_view_id" ref="aly_entity_contract_value_report_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No units yet</p>
+            <p>The value of leased, reserved and sold units, and the potential yearly value of
+                available units, appears here once properties and units are created.</p>
+        </field>
+    </record>
+
+</odoo>

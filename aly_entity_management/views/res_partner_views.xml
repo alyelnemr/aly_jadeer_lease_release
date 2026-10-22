@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_partner_view_form_inherit_aly_entity" model="ir.ui.view">
+        <field name="name">res.partner.view.form.inherit.aly.entity</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="identity_type"/>
+                <field name="identity_number" invisible="not identity_type"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="res_partner_view_form_aly_customer" model="ir.ui.view">
+        <field name="name">res.partner.view.form.aly.customer</field>
+        <field name="model">res.partner</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <form string="Customer">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_aly_view_reservations" type="object" class="oe_stat_button" icon="fa-bookmark">
+                            <field name="aly_reservation_count" widget="statinfo" string="Reservations"/>
+                        </button>
+                        <button name="action_aly_view_leases" type="object" class="oe_stat_button" icon="fa-key">
+                            <field name="aly_lease_count" widget="statinfo" string="Leases"/>
+                        </button>
+                        <button name="action_aly_view_sales" type="object" class="oe_stat_button" icon="fa-handshake-o">
+                            <field name="aly_sale_count" widget="statinfo" string="Purchases"/>
+                        </button>
+                        <button name="action_aly_view_units" type="object" class="oe_stat_button" icon="fa-building">
+                            <field name="aly_unit_count" widget="statinfo" string="Units"/>
+                        </button>
+                        <button name="action_aly_view_signatures" type="object" class="oe_stat_button" icon="fa-pencil">
+                            <field name="aly_signature_count" widget="statinfo" string="Signatures"/>
+                        </button>
+                        <button name="action_aly_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o">
+                            <field name="aly_invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button name="action_aly_view_payments" type="object" class="oe_stat_button" icon="fa-money">
+                            <field name="aly_payment_count" widget="statinfo" string="Payments"/>
+                        </button>
+                        <button name="action_aly_view_unpaid_invoices" type="object" class="oe_stat_button" icon="fa-exclamation-circle">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="aly_balance_due" widget="monetary"/>
+                                </span>
+                                <span class="o_stat_text">Balance Due</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Blacklisted" bg_color="text-bg-danger" invisible="not aly_is_blacklisted"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Customer name" required="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="aly_customer_type" required="1" widget="radio" options="{'horizontal': true}"/>
+                            <field name="mobile" required="1" widget="phone"/>
+                            <field name="email" widget="email" placeholder="Used to send the contract to sign and the invoices"/>
+                            <field name="identity_type" required="1"/>
+                            <field name="identity_number" required="1"/>
+                        </group>
+                        <group>
+                            <field name="aly_is_blacklisted"/>
+                            <field name="aly_blacklist_reason" invisible="not aly_is_blacklisted" required="aly_is_blacklisted"
+                                  />
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="res_partner_view_list_aly_customer" model="ir.ui.view">
+        <field name="name">res.partner.view.list.aly.customer</field>
+        <field name="model">res.partner</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Customers" decoration-danger="aly_is_blacklisted">
+                <field name="name"/>
+                <field name="aly_customer_type" widget="badge"
+                       decoration-info="aly_customer_type == 'tenant'" decoration-success="aly_customer_type == 'buyer'"
+                       decoration-primary="aly_customer_type == 'both'"/>
+                <field name="mobile"/>
+                <field name="email" optional="show"/>
+                <field name="identity_type"/>
+                <field name="identity_number"/>
+                <field name="aly_reservation_count" string="Reservations" optional="show"/>
+                <field name="aly_is_blacklisted" widget="boolean_toggle" readonly="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="res_partner_view_search_aly_customer" model="ir.ui.view">
+        <field name="name">res.partner.view.search.aly.customer</field>
+        <field name="model">res.partner</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <search string="Customers">
+                <field name="name"/>
+                <field name="mobile"/>
+                <field name="identity_number"/>
+                <filter name="filter_tenants" string="Tenants" domain="[('aly_customer_type', 'in', ('tenant', 'both'))]"/>
+                <filter name="filter_buyers" string="Buyers" domain="[('aly_customer_type', 'in', ('buyer', 'both'))]"/>
+                <separator/>
+                <filter name="filter_blacklisted" string="Blacklisted" domain="[('aly_is_blacklisted', '=', True)]"/>
+                <filter name="filter_not_blacklisted" string="Not Blacklisted" domain="[('aly_is_blacklisted', '=', False)]"/>
+                <separator/>
+                <filter name="filter_has_contract" string="With Contracts" domain="[('aly_contract_ids', '!=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_customer_type" string="Customer Type" context="{'group_by': 'aly_customer_type'}"/>
+                    <filter name="group_identity_type" string="Identity Type" context="{'group_by': 'identity_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="res_partner_action_aly_customer" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">['|', '|', ('aly_customer_type', '!=', False), ('identity_number', '!=', False), ('aly_reservation_ids', '!=', False)]</field>
+        <field name="context">{'default_is_company': False}</field>
+        <field name="search_view_id" ref="res_partner_view_search_aly_customer"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('res_partner_view_list_aly_customer')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('res_partner_view_form_aly_customer')})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Register your first tenant or buyer</p>
+            <p>Customers need a mobile number and an identity document before a reservation
+                can be confirmed for them.</p>
+        </field>
+    </record>
+
+</odoo>

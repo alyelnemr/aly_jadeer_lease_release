@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="portal_breadcrumbs_aly_entity" name="Portal breadcrumbs: real estate" inherit_id="portal.portal_breadcrumbs" priority="40">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'aly_reservation'" t-attf-class="breadcrumb-item #{'active ' if not reservation else ''}">
+                <a t-if="reservation" href="/my/reservations">Reservations</a>
+                <t t-else="">Reservations</t>
+            </li>
+            <li t-if="page_name == 'aly_reservation' and reservation" class="breadcrumb-item active">
+                <t t-out="reservation.name"/>
+            </li>
+            <li t-if="page_name == 'aly_contract'" t-attf-class="breadcrumb-item #{'active ' if not contract else ''}">
+                <a t-if="contract" href="/my/contracts">Contracts</a>
+                <t t-else="">Contracts</t>
+            </li>
+            <li t-if="page_name == 'aly_contract' and contract" class="breadcrumb-item active">
+                <t t-out="contract.name"/>
+            </li>
+            <li t-if="page_name == 'aly_unit'" class="breadcrumb-item active">My Units</li>
+            <li t-if="page_name == 'aly_reserve'" t-attf-class="breadcrumb-item #{'active ' if not unit else ''}">
+                <a t-if="unit" href="/my/reserve">Reserve a Unit</a>
+                <t t-else="">Reserve a Unit</t>
+            </li>
+            <li t-if="page_name == 'aly_reserve' and unit" class="breadcrumb-item active">
+                <t t-out="unit.display_name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_aly_entity" name="Real Estate" inherit_id="portal.portal_my_home" priority="40" customize_show="True">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/aly_entity_management/static/description/icon.png'"/>
+                <t t-set="title">Reserve a Unit</t>
+                <t t-set="url" t-value="'/my/reserve'"/>
+                <t t-set="text">Browse the units and request a reservation</t>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/aly_entity_management/static/description/icon.png'"/>
+                <t t-set="title">My Units</t>
+                <t t-set="url" t-value="'/my/units'"/>
+                <t t-set="text">Units you rent, bought or reserved</t>
+                <t t-set="placeholder_count" t-value="'aly_unit_count'"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/aly_entity_management/static/description/icon.png'"/>
+                <t t-set="title">My Reservations</t>
+                <t t-set="url" t-value="'/my/reservations'"/>
+                <t t-set="text">Follow your reservation requests</t>
+                <t t-set="placeholder_count" t-value="'aly_reservation_count'"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/aly_entity_management/static/description/icon.png'"/>
+                <t t-set="title">My Contracts</t>
+                <t t-set="url" t-value="'/my/contracts'"/>
+                <t t-set="text">Review, sign and download your contracts</t>
+                <t t-set="placeholder_count" t-value="'aly_contract_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="portal_aly_unit_state_badge" name="Unit status badge">
+        <t t-set="badge_class" t-value="{'available': 'text-bg-success', 'reserved': 'text-bg-warning', 'leased': 'text-bg-info', 'sold': 'text-bg-secondary'}.get(unit.state, 'text-bg-light')"/>
+        <span t-att-class="'badge ' + badge_class" t-field="unit.state"/>
+    </template>
+
+    <template id="portal_aly_unit_card" name="Unit card">
+        <div class="col-12 col-sm-6 col-lg-4 mb-4">
+            <div class="card h-100 o_aly_portal_card">
+                <a t-att-href="link">
+                    <div class="o_aly_card_image position-relative">
+                        <img t-attf-src="/web/image/aly.entity.unit/#{unit.id}/image_512" class="card-img-top object-fit-cover w-100 h-100"
+                             t-att-alt="unit.name"/>
+                        <span class="position-absolute top-0 end-0 m-2">
+                            <t t-call="aly_entity_management.portal_aly_unit_state_badge"/>
+                        </span>
+                    </div>
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title mb-1">
+                        <a t-att-href="link"><t t-out="unit.name"/></a>
+                        <small class="text-muted">· <t t-out="unit.entity_id.name"/></small>
+                    </h5>
+                    <div class="text-muted"><span t-field="unit.unit_type"/> · <span t-field="unit.floor"/></div>
+                    <div class="text-muted"><span t-field="unit.area"/> m² · <span t-field="unit.rooms"/> rooms</div>
+                    <div t-if="unit.is_for_rent" class="mt-2">Rent: <strong t-field="unit.yearly_rent"/> / year</div>
+                    <div t-if="unit.is_for_sale">Sale: <strong t-field="unit.sale_price"/></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="portal_reserve_units" name="Reserve a Unit">
+        <t t-call="portal.portal_layout">
+            <h3 class="mt-3 mb-3">Reserve a Unit</h3>
+            <div t-if="is_blacklisted" class="alert alert-danger">
+                Online reservations are not available for your account. Please contact us.
+            </div>
+            <form method="get" action="/my/reserve" class="row g-2 mb-4">
+                <div class="col-md-4">
+                    <select name="entity_id" class="form-select">
+                        <option value="">All properties</option>
+                        <t t-foreach="entities" t-as="entity">
+                            <option t-att-value="entity.id" t-att-selected="str(entity.id) == filters['entity_id']">
+                                <t t-out="entity.name"/>
+                            </option>
+                        </t>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="unit_type" class="form-select">
+                        <option value="">All types</option>
+                        <option value="residential" t-att-selected="filters['unit_type'] == 'residential'">Residential</option>
+                        <option value="commercial" t-att-selected="filters['unit_type'] == 'commercial'">Commercial</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="offer" class="form-select">
+                        <option value="">Rent or buy</option>
+                        <option value="rent" t-att-selected="filters['offer'] == 'rent'">For rent</option>
+                        <option value="sale" t-att-selected="filters['offer'] == 'sale'">For sale</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+            <div t-if="not units" class="alert alert-info">No unit matches these filters.</div>
+            <div class="row">
+                <t t-foreach="units" t-as="card_unit">
+                    <t t-call="aly_entity_management.portal_aly_unit_card">
+                        <t t-set="unit" t-value="card_unit"/>
+                        <t t-set="link" t-value="'/my/reserve/%s' % card_unit.id"/>
+                    </t>
+                </t>
+            </div>
+            <div t-if="pager" class="o_portal_pager d-flex justify-content-center">
+                <t t-call="portal.pager"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_reserve_unit" name="Unit">
+        <t t-call="portal.portal_layout">
+            <div class="row mt-3">
+                <div class="col-lg-7">
+                    <div id="aly_unit_gallery" class="carousel slide mb-3" data-bs-ride="carousel">
+                        <div class="carousel-inner o_aly_carousel">
+                            <div class="carousel-item active">
+                                <img t-attf-src="/web/image/aly.entity.unit/#{unit.id}/image_1024" class="d-block w-100 object-fit-cover h-100" t-att-alt="unit.name"/>
+                            </div>
+                            <t t-foreach="unit.image_ids" t-as="photo">
+                                <div class="carousel-item">
+                                    <img t-attf-src="/web/image/aly.entity.unit.image/#{photo.id}/image_1024" class="d-block w-100 object-fit-cover h-100" t-att-alt="photo.name"/>
+                                    <div class="carousel-caption d-none d-md-block"><t t-out="photo.name"/></div>
+                                </div>
+                            </t>
+                        </div>
+                        <t t-if="unit.image_ids">
+                            <button class="carousel-control-prev" type="button" data-bs-target="#aly_unit_gallery" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"/>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#aly_unit_gallery" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"/>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </t>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <h3>
+                        <t t-out="unit.name"/> <small class="text-muted">· <t t-out="unit.entity_id.name"/></small>
+                    </h3>
+                    <p><t t-call="aly_entity_management.portal_aly_unit_state_badge"/></p>
+                    <ul class="list-unstyled">
+                        <li><span t-field="unit.unit_type"/> · <span t-field="unit.floor"/></li>
+                        <li><span t-field="unit.area"/> m² · <span t-field="unit.rooms"/> rooms</li>
+                        <li t-if="unit.entity_id.city"><i class="fa fa-map-marker me-1"/><t t-out="unit.entity_id.city"/></li>
+                        <li t-if="unit.is_for_rent">Rent: <strong t-field="unit.yearly_rent"/> / year</li>
+                        <li t-if="unit.is_for_sale">Sale: <strong t-field="unit.sale_price"/></li>
+                    </ul>
+
+                    <div t-if="is_blacklisted" class="alert alert-danger">
+                        Online reservations are not available for your account. Please contact us.
+                    </div>
+                    <div t-elif="unit.state == 'sold'" class="alert alert-secondary">This unit is sold.</div>
+                    <form t-else="" method="post" t-attf-action="/my/reserve/#{unit.id}" class="card card-body">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <h5>Request a reservation</h5>
+                        <div t-if="error" class="alert alert-danger" t-out="error"/>
+                        <t t-set="is_sale" t-value="post.get('contract_type') == 'sale' or not unit.is_for_rent"/>
+                        <t t-set="min_date" t-value="datetime.date.today().isoformat()"/>
+                        <div class="mb-2">
+                            <label class="form-label" for="contract_type">I want to</label>
+                            <select id="contract_type" name="contract_type" class="form-select o_aly_contract_type">
+                                <option t-if="unit.is_for_rent" value="lease" t-att-selected="not is_sale">Rent this unit</option>
+                                <option t-if="unit.is_for_sale" value="sale" t-att-selected="is_sale">Buy this unit</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label" for="date_start">
+                                <span t-att-class="'o_aly_lease_only' + (' d-none' if is_sale else '')">Start date</span>
+                                <span t-att-class="'o_aly_sale_only' + ('' if is_sale else ' d-none')">Handover date</span>
+                            </label>
+                            <input id="date_start" type="date" name="date_start" class="form-control" required="required"
+                                   t-att-min="min_date" t-att-value="post.get('date_start')"/>
+                        </div>
+                        <div t-att-class="'mb-3 o_aly_lease_only' + (' d-none' if is_sale else '')">
+                            <label class="form-label" for="date_end">End date</label>
+                            <input id="date_end" type="date" name="date_end" class="form-control"
+                                   t-att-min="min_date" t-att-value="post.get('date_end')"
+                                   t-att-required="None if is_sale else 'required'"/>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Request</button>
+                        <small class="text-muted mt-2">Our team reviews and confirms your request, then sends you the contract to sign.</small>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_units" name="My Units">
+        <t t-call="portal.portal_layout">
+            <h3 class="mt-3 mb-3">My Units</h3>
+            <div t-if="not units" class="alert alert-info">You have no units yet.
+                <a href="/my/reserve">Reserve a unit</a></div>
+            <div class="row">
+                <t t-foreach="units" t-as="card_unit">
+                    <t t-call="aly_entity_management.portal_aly_unit_card">
+                        <t t-set="unit" t-value="card_unit"/>
+                        <t t-set="link" t-value="'/my/reserve/%s' % card_unit.id"/>
+                    </t>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_reservations" name="My Reservations">
+        <t t-call="portal.portal_layout">
+            <h3 class="mt-3 mb-3">Reservations</h3>
+            <div t-if="not reservations" class="alert alert-info">You have no reservations yet.
+                <a href="/my/reserve">Reserve a unit</a></div>
+            <t t-if="reservations" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Reservation</th>
+                        <th>Unit</th>
+                        <th>Type</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th class="text-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="reservations" t-as="reservation">
+                        <tr>
+                            <td><a t-att-href="reservation.get_portal_url()" t-out="reservation.name"/></td>
+                            <td t-out="reservation.unit_id.display_name"/>
+                            <td><span t-field="reservation.contract_type"/></td>
+                            <td><span t-field="reservation.date_start"/></td>
+                            <td><span t-field="reservation.date_end"/></td>
+                            <td class="text-end"><span class="badge text-bg-light" t-field="reservation.state"/></td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_reservation" name="My Reservation">
+        <t t-call="portal.portal_layout">
+            <div t-if="message == 'requested'" class="alert alert-success mt-3">
+                Your request was sent. We will confirm it and send you the contract to sign.
+            </div>
+            <div class="card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Reservation <t t-out="reservation.name"/></h4>
+                    <span class="badge text-bg-light fs-6" t-field="reservation.state"/>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Unit</dt><dd class="col-sm-8" t-out="reservation.unit_id.display_name"/>
+                        <dt class="col-sm-4">Type</dt><dd class="col-sm-8"><span t-field="reservation.contract_type"/></dd>
+                        <dt class="col-sm-4">From</dt><dd class="col-sm-8"><span t-field="reservation.date_start"/></dd>
+                        <t t-if="reservation.date_end">
+                            <dt class="col-sm-4">To</dt><dd class="col-sm-8"><span t-field="reservation.date_end"/></dd>
+                        </t>
+                        <t t-if="reservation.expiry_date and reservation.state in ('confirmed', 'awaiting_signature')">
+                            <dt class="col-sm-4">Valid until</dt><dd class="col-sm-8"><span t-field="reservation.expiry_date"/></dd>
+                        </t>
+                    </dl>
+                    <div class="mt-3">
+                        <a t-if="reservation.state != 'draft'" class="btn btn-secondary"
+                           t-att-href="reservation.get_portal_url(report_type='pdf', download=True)">
+                            <i class="fa fa-download me-1"/>Download
+                        </a>
+                        <a t-if="reservation.contract_id and reservation.contract_id.state != 'draft'" class="btn btn-primary"
+                           t-att-href="reservation.contract_id.get_portal_url()">
+                            <i class="fa fa-file-text-o me-1"/>Open Contract
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <t t-call="portal.message_thread"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_contracts" name="My Contracts">
+        <t t-call="portal.portal_layout">
+            <h3 class="mt-3 mb-3">Contracts</h3>
+            <div t-if="not contracts" class="alert alert-info">You have no contracts yet.</div>
+            <t t-if="contracts" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Contract</th>
+                        <th>Unit</th>
+                        <th>Type</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th class="text-end">Value</th>
+                        <th class="text-end">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="contracts" t-as="contract">
+                        <tr>
+                            <td><a t-att-href="contract.get_portal_url()" t-out="contract.name"/></td>
+                            <td t-out="contract.unit_id.display_name"/>
+                            <td><span t-field="contract.contract_type"/></td>
+                            <td><span t-field="contract.date_start"/></td>
+                            <td><span t-field="contract.date_end"/></td>
+                            <td class="text-end"><span t-field="contract.total_amount"/></td>
+                            <td class="text-end">
+                                <span t-if="contract.state == 'awaiting_signature'" class="badge text-bg-warning">To sign</span>
+                                <span t-else="" class="badge text-bg-light" t-field="contract.state"/>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_contract" name="My Contract">
+        <t t-call="portal.portal_layout">
+            <div t-if="message == 'signed'" class="alert alert-success mt-3">
+                Thank you, your contract is signed. A manager will approve it shortly.
+            </div>
+            <div class="card mt-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <span t-field="contract.contract_type"/> contract <t t-out="contract.name"/>
+                    </h4>
+                    <span class="badge text-bg-light fs-6" t-field="contract.state"/>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Unit</dt><dd class="col-sm-8" t-out="contract.unit_id.display_name"/>
+                        <dt class="col-sm-4">Period</dt>
+                        <dd class="col-sm-8"><span t-field="contract.date_start"/> - <span t-field="contract.date_end"/>
+                            (<t t-out="contract.duration_months"/> months)</dd>
+                        <dt class="col-sm-4" t-if="contract.contract_type == 'lease'">Rent for the whole period</dt>
+                        <dt class="col-sm-4" t-else="">Sale price</dt>
+                        <dd class="col-sm-8"><span t-field="contract.base_amount"/></dd>
+                        <dt class="col-sm-4">Service fee</dt><dd class="col-sm-8"><span t-field="contract.service_fee"/></dd>
+                        <dt class="col-sm-4">Administrative fee</dt><dd class="col-sm-8"><span t-field="contract.admin_fee"/></dd>
+                        <dt class="col-sm-4">Full contract value</dt><dd class="col-sm-8 fw-bold"><span t-field="contract.total_amount"/></dd>
+                        <dt class="col-sm-4">Payment</dt>
+                        <dd class="col-sm-8"><span t-field="contract.payment_frequency"/>, <t t-out="contract.payment_count"/> payment(s)</dd>
+                    </dl>
+
+                    <h5>Payment schedule</h5>
+                    <table class="table table-sm">
+                        <thead><tr><th>#</th><th>Period</th><th class="text-end">Amount</th></tr></thead>
+                        <tbody>
+                            <t t-foreach="installments" t-as="inst">
+                                <tr>
+                                    <td t-out="inst['number']"/>
+                                    <td><t t-out="inst['date_start']" t-options="{'widget': 'date'}"/> -
+                                        <t t-out="inst['date_end']" t-options="{'widget': 'date'}"/></td>
+                                    <td class="text-end">
+                                        <t t-set="fees" t-value="(contract.service_fee + contract.admin_fee) if inst['number'] == 1 else 0"/>
+                                        <t t-out="inst['amount'] + fees" t-options="{'widget': 'monetary', 'display_currency': contract.currency_id}"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <t t-if="invoices">
+                        <h5>Invoices</h5>
+                        <table class="table table-sm">
+                            <thead><tr><th>Invoice</th><th>Date</th><th class="text-end">Amount</th><th class="text-end">Status</th></tr></thead>
+                            <tbody>
+                                <t t-foreach="invoices" t-as="invoice">
+                                    <tr>
+                                        <td><a t-att-href="invoice.get_portal_url()" t-out="invoice.name"/></td>
+                                        <td><span t-field="invoice.invoice_date"/></td>
+                                        <td class="text-end"><span t-field="invoice.amount_total"/></td>
+                                        <td class="text-end"><span class="badge text-bg-light" t-field="invoice.payment_state"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+
+                    <div class="d-flex gap-2 mt-3">
+                        <button t-if="contract.state == 'awaiting_signature'" class="btn btn-primary"
+                                data-bs-toggle="modal" data-bs-target="#modal_aly_contract_sign">
+                            <i class="fa fa-pencil me-1"/>Sign Contract
+                        </button>
+                        <a class="btn btn-secondary" t-att-href="contract.get_portal_url(report_type='pdf', download=True)">
+                            <i class="fa fa-download me-1"/>Download
+                        </a>
+                    </div>
+                    <div t-if="contract.signature" class="mt-3 text-muted">
+                        Signed by <t t-out="contract.signed_by"/> on <span t-field="contract.signed_on"/>.
+                    </div>
+                </div>
+            </div>
+
+            <div t-if="contract.state == 'awaiting_signature'" role="dialog" class="modal fade" id="modal_aly_contract_sign">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <header class="modal-header">
+                            <h4 class="modal-title">Sign Contract <t t-out="contract.name"/></h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
+                        </header>
+                        <main class="modal-body">
+                            <p>By signing, you accept this contract for a full value of
+                                <strong t-field="contract.total_amount"/>.</p>
+                            <t t-call="portal.signature_form">
+                                <t t-set="call_url" t-value="contract.get_portal_url(suffix='/sign')"/>
+                                <t t-set="default_name" t-value="contract.partner_id.name"/>
+                                <t t-set="send_label">Sign Contract</t>
+                            </t>
+                        </main>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <t t-call="portal.message_thread"/>
+            </div>
+        </t>
+    </template>
+
+</odoo>

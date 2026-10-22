@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_maintenance_request_view_form" model="ir.ui.view">
+        <field name="name">aly.entity.maintenance.request.view.form</field>
+        <field name="model">aly.entity.maintenance.request</field>
+        <field name="arch" type="xml">
+            <form string="Maintenance Request">
+                <header>
+                    <button name="action_submit" type="object" string="Send for Approval" class="btn-primary"
+                            invisible="state != 'draft' or not id"/>
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                            invisible="state != 'to_approve' or not can_approve"/>
+                    <button name="action_send_back" type="object" string="Send Back"
+                            invisible="state != 'to_approve' or not can_approve"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,to_approve,approved"/>
+                </header>
+                <div class="alert alert-danger mb-0" role="alert" invisible="not late_line_count">
+                    <field name="late_line_count" readonly="1" class="fw-bold"/> visit(s) recorded more than 7 days
+                    after the day worked.
+                </div>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-file-text-o"
+                                context="{'aly_field': 'contract_id'}" invisible="not contract_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Contract</span>
+                                <field name="contract_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-home"
+                                context="{'aly_field': 'unit_id'}" invisible="not unit_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Unit</span>
+                                <field name="unit_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-building"
+                                context="{'aly_field': 'entity_id'}" invisible="not entity_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Property</span>
+                                <field name="entity_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                        <button name="action_aly_open_related" type="object" class="oe_stat_button" icon="fa-user"
+                                context="{'aly_field': 'partner_id'}" invisible="not partner_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Customer</span>
+                                <field name="partner_id" readonly="1" class="o_stat_value" options="{'no_open': True}"/>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Approved - Locked" bg_color="text-bg-success" invisible="state != 'approved'"/>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                        <h3><field name="title" placeholder="e.g. Living room AC leak" readonly="state != 'draft'"/></h3>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="unit_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="contract_id" readonly="state != 'draft'" options="{'no_create': True}"/>
+                            <field name="request_date" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="total_hours" widget="float_time"/>
+                            <field name="approver_user_id"/>
+                            <field name="approved_by_id" invisible="state != 'approved'"/>
+                            <field name="approved_on" invisible="state != 'approved'"/>
+                            <field name="can_approve" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Visits" name="visits">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom" decoration-danger="is_late">
+                                    <field name="employee_id" options="{'no_create': True}"/>
+                                    <field name="date"/>
+                                    <field name="time_from" widget="float_time"/>
+                                    <field name="time_to" widget="float_time"/>
+                                    <field name="hours" widget="float_time" sum="Total"/>
+                                    <field name="description"/>
+                                    <field name="recorded_on"/>
+                                    <field name="recorded_by_id" optional="hide"/>
+                                    <field name="is_late" widget="boolean"/>
+                                    <field name="late_days" optional="show"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_view_list" model="ir.ui.view">
+        <field name="name">aly.entity.maintenance.request.view.list</field>
+        <field name="model">aly.entity.maintenance.request</field>
+        <field name="arch" type="xml">
+            <list string="Maintenance Requests" decoration-danger="late_line_count and state != 'approved'"
+                  decoration-muted="state == 'approved'">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="unit_id"/>
+                <field name="contract_id" optional="show"/>
+                <field name="partner_id" optional="show"/>
+                <field name="request_date"/>
+                <field name="total_hours" widget="float_time" sum="Total"/>
+                <field name="late_line_count" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'" decoration-warning="state == 'to_approve'"
+                       decoration-success="state == 'approved'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_view_search" model="ir.ui.view">
+        <field name="name">aly.entity.maintenance.request.view.search</field>
+        <field name="model">aly.entity.maintenance.request</field>
+        <field name="arch" type="xml">
+            <search string="Maintenance Requests">
+                <field name="name" filter_domain="['|', ('name', 'ilike', self), ('title', 'ilike', self)]"/>
+                <field name="unit_id"/>
+                <field name="contract_id"/>
+                <field name="entity_id"/>
+                <filter name="filter_to_approve" string="Waiting My Approval"
+                        domain="[('state', '=', 'to_approve'), ('entity_id.manager_id.user_id', '=', uid)]"/>
+                <filter name="filter_draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <separator/>
+                <filter name="filter_late" string="With Late Visits" domain="[('late_line_count', '>', 0)]"/>
+                <separator/>
+                <filter name="filter_date" string="Request Date" date="request_date"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_unit" string="Unit" context="{'group_by': 'unit_id'}"/>
+                    <filter name="group_entity" string="Property" context="{'group_by': 'entity_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_action" model="ir.actions.act_window">
+        <field name="name">Maintenance Requests</field>
+        <field name="res_model">aly.entity.maintenance.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="aly_entity_maintenance_request_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a maintenance request</p>
+            <p>One request per problem on a unit. Add one line per visit of a maintenance worker
+                (day, start and end time, what was done), then send the request to the property
+                manager. Approval locks the request and all its visits; visits recorded more than
+                7 days late are marked.</p>
+        </field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_line_view_list" model="ir.ui.view">
+        <field name="name">aly.entity.maintenance.request.line.view.list</field>
+        <field name="model">aly.entity.maintenance.request.line</field>
+        <field name="arch" type="xml">
+            <list string="Maintenance Hours" create="0" edit="0" delete="0" decoration-danger="is_late">
+                <field name="request_id"/>
+                <field name="date"/>
+                <field name="employee_id"/>
+                <field name="unit_id"/>
+                <field name="contract_id" optional="show"/>
+                <field name="time_from" widget="float_time"/>
+                <field name="time_to" widget="float_time"/>
+                <field name="hours" widget="float_time" sum="Total"/>
+                <field name="description" optional="show"/>
+                <field name="recorded_on"/>
+                <field name="is_late" widget="boolean"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'draft'" decoration-warning="state == 'to_approve'"
+                       decoration-success="state == 'approved'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_line_view_pivot" model="ir.ui.view">
+        <field name="name">aly.entity.maintenance.request.line.view.pivot</field>
+        <field name="model">aly.entity.maintenance.request.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Maintenance Hours" sample="1">
+                <field name="employee_id" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="hours" type="measure" widget="float_time"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_line_view_search" model="ir.ui.view">
+        <field name="name">aly.entity.maintenance.request.line.view.search</field>
+        <field name="model">aly.entity.maintenance.request.line</field>
+        <field name="arch" type="xml">
+            <search string="Maintenance Hours">
+                <field name="employee_id"/>
+                <field name="request_id"/>
+                <field name="unit_id"/>
+                <field name="contract_id"/>
+                <filter name="filter_late" string="Late" domain="[('is_late', '=', True)]"/>
+                <filter name="filter_approved" string="Approved" domain="[('state', '=', 'approved')]"/>
+                <separator/>
+                <filter name="filter_date" string="Day Worked" date="date"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_employee" string="Worker" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_unit" string="Unit" context="{'group_by': 'unit_id'}"/>
+                    <filter name="group_contract" string="Contract" context="{'group_by': 'contract_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="aly_entity_maintenance_request_line_action" model="ir.actions.act_window">
+        <field name="name">Maintenance Hours</field>
+        <field name="res_model">aly.entity.maintenance.request.line</field>
+        <field name="view_mode">pivot,list</field>
+        <field name="search_view_id" ref="aly_entity_maintenance_request_line_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No maintenance hours yet</p>
+            <p>Hours of every visit recorded on maintenance requests, per worker and month.</p>
+        </field>
+    </record>
+
+</odoo>

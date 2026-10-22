@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    
+
+    <record id="base.main_company" model="res.company">
+        <field name="aly_default_service_fee">2000</field>
+        <field name="aly_default_admin_fee">500</field>
+    </record>
+
+    
+
+    <record id="partner_aly_ahmed" model="res.partner">
+        <field name="aly_customer_type">tenant</field>
+        <field name="name">Ahmed Al-Harbi</field>
+        <field name="mobile">+966 50 123 4567</field>
+        <field name="email">ahmed.harbi@example.com</field>
+        <field name="identity_type">national_id</field>
+        <field name="identity_number">1012345678</field>
+    </record>
+
+    <record id="partner_aly_sara" model="res.partner">
+        <field name="aly_customer_type">tenant</field>
+        <field name="name">Sara Haddad</field>
+        <field name="mobile">+966 55 765 4321</field>
+        <field name="email">sara.haddad@example.com</field>
+        <field name="identity_type">iqama</field>
+        <field name="identity_number">2123456789</field>
+    </record>
+
+    <record id="partner_aly_mona" model="res.partner">
+        <field name="aly_customer_type">both</field>
+        <field name="name">Mona Wilson</field>
+        <field name="mobile">+44 7700 900123</field>
+        <field name="email">mona.wilson@example.com</field>
+        <field name="identity_type">passport</field>
+        <field name="identity_number">GB1234567</field>
+    </record>
+
+    <record id="partner_aly_faisal" model="res.partner">
+        <field name="aly_customer_type">tenant</field>
+        <field name="name">Faisal Al-Qahtani</field>
+        <field name="mobile">+966 54 222 3333</field>
+        <field name="email">faisal.qahtani@example.com</field>
+        <field name="identity_type">national_id</field>
+        <field name="identity_number">1098765432</field>
+        <field name="aly_is_blacklisted" eval="True"/>
+        <field name="aly_blacklist_reason">Repeated late payments on a previous lease.</field>
+    </record>
+
+    
+
+    <record id="user_aly_salem" model="res.users">
+        <field name="name">Salem Al-Otaibi</field>
+        <field name="login">user1</field>
+        <field name="password">user1</field>
+        <field name="email">salem@example.com</field>
+        <field name="groups_id" eval="[(6, 0, [ref('aly_entity_management.group_aly_entity_user')])]"/>
+    </record>
+
+    <record id="user_aly_khalid" model="res.users">
+        <field name="name">Khalid Al-Mutairi</field>
+        <field name="login">manager1</field>
+        <field name="password">manager1</field>
+        <field name="email">khalid@example.com</field>
+        <field name="groups_id" eval="[(6, 0, [ref('aly_entity_management.group_aly_entity_manager'), ref('hr.group_hr_user')])]"/>
+    </record>
+
+    <record id="user_aly_sara" model="res.users">
+        <field name="partner_id" ref="partner_aly_sara"/>
+        <field name="login">portal1</field>
+        <field name="password">portal1</field>
+        <field name="groups_id" eval="[(6, 0, [ref('base.group_portal')])]"/>
+    </record>
+
+    
+
+    <record id="employee_aly_khalid" model="hr.employee">
+        <field name="name">Khalid Al-Mutairi</field>
+        <field name="user_id" ref="user_aly_khalid"/>
+        <field name="job_title">Property Manager</field>
+    </record>
+
+    <record id="employee_aly_salem" model="hr.employee">
+        <field name="name">Salem Al-Otaibi</field>
+        <field name="user_id" ref="user_aly_salem"/>
+        <field name="job_title">Leasing Officer</field>
+    </record>
+
+    <record id="employee_aly_fahd" model="hr.employee">
+        <field name="name">Fahd Al-Shehri</field>
+        <field name="job_title">Maintenance Technician</field>
+        <field name="is_maintenance_worker" eval="True"/>
+    </record>
+
+    <record id="employee_aly_omar" model="hr.employee">
+        <field name="name">Omar Nasser</field>
+        <field name="job_title">Electrician</field>
+        <field name="is_maintenance_worker" eval="True"/>
+    </record>
+
+    
+
+    <record id="entity_aly_nakheel" model="aly.entity">
+        <field name="name">Al Nakheel Tower</field>
+        <field name="code">NKH</field>
+        <field name="entity_type">tower</field>
+        <field name="street">King Fahd Road</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa"/>
+        <field name="manager_id" ref="employee_aly_khalid"/>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/entity_nakheel.jpg"/>
+    </record>
+
+    <record id="entity_aly_yasmin" model="aly.entity">
+        <field name="name">Al Yasmin Villas</field>
+        <field name="code">YSM</field>
+        <field name="entity_type">villas</field>
+        <field name="street">Al Yasmin District</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa"/>
+        <field name="manager_id" ref="employee_aly_khalid"/>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/entity_yasmin.jpg"/>
+    </record>
+
+    <record id="entity_aly_business" model="aly.entity">
+        <field name="name">Olaya Business Center</field>
+        <field name="code">OBC</field>
+        <field name="entity_type">commercial</field>
+        <field name="street">Olaya Street</field>
+        <field name="city">Riyadh</field>
+        <field name="country_id" ref="base.sa"/>
+        <field name="manager_id" ref="employee_aly_salem"/>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/entity_business.jpg"/>
+    </record>
+
+    
+
+    <record id="unit_aly_a101" model="aly.entity.unit">
+        <field name="name">A-101</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="unit_type">residential</field>
+        <field name="floor">1</field>
+        <field name="area">120</field>
+        <field name="rooms">3</field>
+        <field name="is_for_rent" eval="True"/>
+        <field name="yearly_rent">60000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_tower.jpg"/>
+    </record>
+
+    <record id="unit_aly_a102" model="aly.entity.unit">
+        <field name="name">A-102</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="unit_type">residential</field>
+        <field name="floor">1</field>
+        <field name="area">110</field>
+        <field name="rooms">2</field>
+        <field name="is_for_rent" eval="True"/>
+        <field name="yearly_rent">55000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_living.jpg"/>
+    </record>
+
+    <record id="unit_aly_a201" model="aly.entity.unit">
+        <field name="name">A-201</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="unit_type">residential</field>
+        <field name="floor">2</field>
+        <field name="area">140</field>
+        <field name="rooms">3</field>
+        <field name="is_for_rent" eval="True"/>
+        <field name="is_for_sale" eval="True"/>
+        <field name="yearly_rent">65000</field>
+        <field name="sale_price">950000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_bedroom.jpg"/>
+    </record>
+
+    <record id="unit_aly_a301" model="aly.entity.unit">
+        <field name="name">A-301</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="unit_type">residential</field>
+        <field name="floor">3</field>
+        <field name="area">160</field>
+        <field name="rooms">4</field>
+        <field name="is_for_rent" eval="True"/>
+        <field name="yearly_rent">72000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_tower.jpg"/>
+    </record>
+
+    <record id="unit_aly_v01" model="aly.entity.unit">
+        <field name="name">V-01</field>
+        <field name="entity_id" ref="entity_aly_yasmin"/>
+        <field name="unit_type">residential</field>
+        <field name="floor">0</field>
+        <field name="area">350</field>
+        <field name="rooms">5</field>
+        <field name="is_for_rent" eval="True"/>
+        <field name="is_for_sale" eval="True"/>
+        <field name="yearly_rent">140000</field>
+        <field name="sale_price">2400000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_villa.jpg"/>
+    </record>
+
+    <record id="unit_aly_v02" model="aly.entity.unit">
+        <field name="name">V-02</field>
+        <field name="entity_id" ref="entity_aly_yasmin"/>
+        <field name="unit_type">residential</field>
+        <field name="floor">0</field>
+        <field name="area">380</field>
+        <field name="rooms">6</field>
+        <field name="is_for_sale" eval="True"/>
+        <field name="is_for_rent" eval="False"/>
+        <field name="sale_price">2650000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_villa.jpg"/>
+    </record>
+
+    <record id="unit_aly_v03" model="aly.entity.unit">
+        <field name="name">V-03</field>
+        <field name="entity_id" ref="entity_aly_yasmin"/>
+        <field name="unit_type">residential</field>
+        <field name="floor">0</field>
+        <field name="area">320</field>
+        <field name="rooms">5</field>
+        <field name="is_for_rent" eval="True"/>
+        <field name="yearly_rent">130000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_villa.jpg"/>
+    </record>
+
+    <record id="unit_aly_g01" model="aly.entity.unit">
+        <field name="name">G-01</field>
+        <field name="entity_id" ref="entity_aly_business"/>
+        <field name="unit_type">commercial</field>
+        <field name="floor">0</field>
+        <field name="area">90</field>
+        <field name="rooms">1</field>
+        <field name="is_for_rent" eval="True"/>
+        <field name="yearly_rent">120000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_shop.jpg"/>
+    </record>
+
+    <record id="unit_aly_o201" model="aly.entity.unit">
+        <field name="name">O-201</field>
+        <field name="entity_id" ref="entity_aly_business"/>
+        <field name="unit_type">commercial</field>
+        <field name="floor">2</field>
+        <field name="area">75</field>
+        <field name="rooms">2</field>
+        <field name="is_for_rent" eval="True"/>
+        <field name="yearly_rent">48000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_office.jpg"/>
+    </record>
+
+    <record id="unit_image_aly_a101_living" model="aly.entity.unit.image">
+        <field name="unit_id" ref="unit_aly_a101"/>
+        <field name="name">Living room</field>
+        <field name="sequence">1</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_living.jpg"/>
+    </record>
+    <record id="unit_image_aly_a101_bedroom" model="aly.entity.unit.image">
+        <field name="unit_id" ref="unit_aly_a101"/>
+        <field name="name">Master bedroom</field>
+        <field name="sequence">2</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_bedroom.jpg"/>
+    </record>
+    <record id="unit_image_aly_a102_bedroom" model="aly.entity.unit.image">
+        <field name="unit_id" ref="unit_aly_a102"/>
+        <field name="name">Bedroom</field>
+        <field name="sequence">1</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_bedroom.jpg"/>
+    </record>
+    <record id="unit_image_aly_v01_living" model="aly.entity.unit.image">
+        <field name="unit_id" ref="unit_aly_v01"/>
+        <field name="name">Family room</field>
+        <field name="sequence">1</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_living.jpg"/>
+    </record>
+    <record id="unit_image_aly_o201_office" model="aly.entity.unit.image">
+        <field name="unit_id" ref="unit_aly_o201"/>
+        <field name="name">Open office</field>
+        <field name="sequence">1</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_office.jpg"/>
+    </record>
+
+    
+
+    
+    <record id="reservation_aly_ahmed_a101" model="aly.entity.reservation">
+        <field name="partner_id" ref="partner_aly_ahmed"/>
+        <field name="unit_id" ref="unit_aly_a101"/>
+        <field name="contract_type">lease</field>
+        <field name="date_start" eval="(DateTime.today() - relativedelta(months=4)).strftime('%Y-%m-01')"/>
+        <field name="date_end" eval="(DateTime.today() - relativedelta(months=4) + relativedelta(years=1)).strftime('%Y-%m-01')"/>
+    </record>
+    <function model="aly.entity.reservation" name="action_confirm" eval="[[ref('reservation_aly_ahmed_a101')]]"/>
+    <record id="contract_aly_ahmed_a101" model="aly.entity.contract">
+        <field name="reservation_id" ref="reservation_aly_ahmed_a101"/>
+        <field name="date_start" eval="(DateTime.today() - relativedelta(months=4)).strftime('%Y-%m-01')"/>
+        <field name="duration_unit">year</field>
+        <field name="duration_value">1</field>
+        <field name="payment_frequency">quarterly</field>
+    </record>
+    <function model="aly.entity.contract" name="action_send_for_signature" eval="[[ref('contract_aly_ahmed_a101')]]"/>
+    <function model="aly.entity.contract" name="write" eval="[[ref('contract_aly_ahmed_a101')], {
+        'state': 'signed', 'signed_by': 'Ahmed Al-Harbi', 'signed_via': 'office',
+        'signed_on': (DateTime.today() - relativedelta(months=4, days=3)).strftime('%Y-%m-%d 10:30:00')}]"/>
+    <function model="aly.entity.reservation" name="write" eval="[[ref('reservation_aly_ahmed_a101')], {'state': 'signed'}]"/>
+    <function model="aly.entity.contract" name="action_approve" eval="[[ref('contract_aly_ahmed_a101')]]"/>
+    <function model="aly.entity.contract" name="write" eval="[[ref('contract_aly_ahmed_a101')], {'approved_by_id': ref('user_aly_khalid')}]"/>
+
+    
+
+    <record id="reservation_aly_mona_v02" model="aly.entity.reservation">
+        <field name="partner_id" ref="partner_aly_mona"/>
+        <field name="unit_id" ref="unit_aly_v02"/>
+        <field name="contract_type">sale</field>
+        <field name="date_start" eval="(DateTime.today() - relativedelta(months=1)).strftime('%Y-%m-01')"/>
+    </record>
+    <function model="aly.entity.reservation" name="action_confirm" eval="[[ref('reservation_aly_mona_v02')]]"/>
+    <record id="contract_aly_mona_v02" model="aly.entity.contract">
+        <field name="reservation_id" ref="reservation_aly_mona_v02"/>
+        <field name="duration_unit">year</field>
+        <field name="duration_value">1</field>
+        <field name="payment_frequency">semi_annual</field>
+        <field name="service_fee">5000</field>
+        <field name="admin_fee">1500</field>
+    </record>
+    <function model="aly.entity.contract" name="action_send_for_signature" eval="[[ref('contract_aly_mona_v02')]]"/>
+    <function model="aly.entity.contract" name="write" eval="[[ref('contract_aly_mona_v02')], {
+        'state': 'signed', 'signed_by': 'Mona Wilson', 'signed_via': 'office',
+        'signed_on': (DateTime.today() - relativedelta(months=1, days=2)).strftime('%Y-%m-%d 12:00:00')}]"/>
+    <function model="aly.entity.reservation" name="write" eval="[[ref('reservation_aly_mona_v02')], {'state': 'signed'}]"/>
+    <function model="aly.entity.contract" name="action_approve" eval="[[ref('contract_aly_mona_v02')]]"/>
+    <function model="aly.entity.contract" name="write" eval="[[ref('contract_aly_mona_v02')], {'approved_by_id': ref('user_aly_khalid')}]"/>
+
+    
+
+    
+    <record id="reservation_aly_sara_a102" model="aly.entity.reservation">
+        <field name="partner_id" ref="partner_aly_sara"/>
+        <field name="unit_id" ref="unit_aly_a102"/>
+        <field name="contract_type">lease</field>
+        <field name="date_start" eval="DateTime.today().strftime('%Y-%m-%d')"/>
+        <field name="date_end" eval="(DateTime.today() + relativedelta(years=1, days=-1)).strftime('%Y-%m-%d')"/>
+    </record>
+    <function model="aly.entity.reservation" name="action_confirm" eval="[[ref('reservation_aly_sara_a102')]]"/>
+    <record id="contract_aly_sara_a102" model="aly.entity.contract">
+        <field name="reservation_id" ref="reservation_aly_sara_a102"/>
+        <field name="duration_unit">month</field>
+        <field name="duration_value">12</field>
+        <field name="payment_frequency">monthly</field>
+    </record>
+    <function model="aly.entity.contract" name="action_send_for_signature" eval="[[ref('contract_aly_sara_a102')]]"/>
+
+    
+
+    
+    <record id="reservation_aly_mona_a101_next" model="aly.entity.reservation">
+        <field name="partner_id" ref="partner_aly_mona"/>
+        <field name="unit_id" ref="unit_aly_a101"/>
+        <field name="contract_type">lease</field>
+        <field name="is_portal_request" eval="True"/>
+        <field name="date_start" eval="(DateTime.today() + relativedelta(months=9)).strftime('%Y-%m-01')"/>
+        <field name="date_end" eval="(DateTime.today() + relativedelta(months=21)).strftime('%Y-%m-01')"/>
+    </record>
+
+    <record id="reservation_aly_faisal_a201" model="aly.entity.reservation">
+        <field name="partner_id" ref="partner_aly_faisal"/>
+        <field name="unit_id" ref="unit_aly_a201"/>
+        <field name="contract_type">lease</field>
+        <field name="date_start" eval="(DateTime.today() + relativedelta(months=1)).strftime('%Y-%m-01')"/>
+        <field name="date_end" eval="(DateTime.today() + relativedelta(months=13)).strftime('%Y-%m-01')"/>
+    </record>
+
+    
+
+    <record id="maintenance_request_aly_ac" model="aly.entity.maintenance.request">
+        <field name="title">Living room AC leak</field>
+        <field name="unit_id" ref="unit_aly_a101"/>
+        <field name="contract_id" ref="contract_aly_ahmed_a101"/>
+        <field name="request_date" eval="(DateTime.today() - relativedelta(days=11)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="maintenance_request_line_aly_ac_1" model="aly.entity.maintenance.request.line">
+        <field name="request_id" ref="maintenance_request_aly_ac"/>
+        <field name="employee_id" ref="employee_aly_omar"/>
+        <field name="date" eval="(DateTime.today() - relativedelta(days=10)).strftime('%Y-%m-%d')"/>
+        <field name="time_from">13.0</field>
+        <field name="time_to">15.0</field>
+        <field name="description">Inspected the indoor unit and found a blocked drain pipe (recorded late).</field>
+    </record>
+    <record id="maintenance_request_line_aly_ac_2" model="aly.entity.maintenance.request.line">
+        <field name="request_id" ref="maintenance_request_aly_ac"/>
+        <field name="employee_id" ref="employee_aly_fahd"/>
+        <field name="date" eval="(DateTime.today() - relativedelta(days=2)).strftime('%Y-%m-%d')"/>
+        <field name="time_from">9.0</field>
+        <field name="time_to">11.5</field>
+        <field name="description">Replaced the drain pipe and tested the AC.</field>
+    </record>
+    <function model="aly.entity.maintenance.request" name="action_submit" eval="[[ref('maintenance_request_aly_ac')]]"/>
+
+    <record id="maintenance_request_aly_heater" model="aly.entity.maintenance.request">
+        <field name="title">Water heater check</field>
+        <field name="unit_id" ref="unit_aly_a101"/>
+        <field name="contract_id" ref="contract_aly_ahmed_a101"/>
+        <field name="request_date" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+    </record>
+    <record id="maintenance_request_line_aly_heater_1" model="aly.entity.maintenance.request.line">
+        <field name="request_id" ref="maintenance_request_aly_heater"/>
+        <field name="employee_id" ref="employee_aly_fahd"/>
+        <field name="date" eval="(DateTime.today() - relativedelta(days=1)).strftime('%Y-%m-%d')"/>
+        <field name="time_from">10.0</field>
+        <field name="time_to">12.0</field>
+        <field name="description">Checked the water heater and the thermostat.</field>
+    </record>
+
+    
+
+    
+    <record id="partner_aly_omar" model="res.partner">
+        <field name="aly_customer_type">tenant</field>
+        <field name="name">Omar Khaled</field>
+        <field name="mobile">+966 50 111 2233</field>
+        <field name="email">omar.khaled@example.com</field>
+        <field name="identity_type">national_id</field>
+        <field name="identity_number">1023456789</field>
+    </record>
+    <record id="partner_aly_layla" model="res.partner">
+        <field name="aly_customer_type">both</field>
+        <field name="name">Layla Ibrahim</field>
+        <field name="mobile">+966 55 222 3344</field>
+        <field name="email">layla.ibrahim@example.com</field>
+        <field name="identity_type">iqama</field>
+        <field name="identity_number">2234567890</field>
+    </record>
+    <record id="partner_aly_john" model="res.partner">
+        <field name="aly_customer_type">tenant</field>
+        <field name="name">John Smith</field>
+        <field name="mobile">+1 202 555 0147</field>
+        <field name="email">john.smith@example.com</field>
+        <field name="identity_type">passport</field>
+        <field name="identity_number">US7654321</field>
+    </record>
+    <record id="partner_aly_noura" model="res.partner">
+        <field name="aly_customer_type">both</field>
+        <field name="name">Noura Al-Saud</field>
+        <field name="mobile">+966 53 333 4455</field>
+        <field name="email">noura.alsaud@example.com</field>
+        <field name="identity_type">national_id</field>
+        <field name="identity_number">1034567890</field>
+    </record>
+    <record id="partner_aly_hassan" model="res.partner">
+        <field name="aly_customer_type">tenant</field>
+        <field name="name">Hassan Ali</field>
+        <field name="mobile">+966 56 444 5566</field>
+        <field name="email">hassan.ali@example.com</field>
+        <field name="identity_type">iqama</field>
+        <field name="identity_number">2345678901</field>
+    </record>
+    <record id="partner_aly_fatima" model="res.partner">
+        <field name="aly_customer_type">tenant</field>
+        <field name="name">Fatima Zahra</field>
+        <field name="mobile">+212 6 12 34 56 78</field>
+        <field name="email">fatima.zahra@example.com</field>
+        <field name="identity_type">passport</field>
+        <field name="identity_number">MA9876543</field>
+    </record>
+    <record id="partner_aly_khaled" model="res.partner">
+        <field name="aly_customer_type">tenant</field>
+        <field name="name">Khaled Mansour</field>
+        <field name="mobile">+966 57 555 6677</field>
+        <field name="email">khaled.mansour@example.com</field>
+        <field name="identity_type">national_id</field>
+        <field name="identity_number">1045678901</field>
+    </record>
+    <record id="partner_aly_reem" model="res.partner">
+        <field name="aly_customer_type">both</field>
+        <field name="name">Reem Al-Harthy</field>
+        <field name="mobile">+966 58 666 7788</field>
+        <field name="email">reem.alharthy@example.com</field>
+        <field name="identity_type">national_id</field>
+        <field name="identity_number">1056789012</field>
+    </record>
+
+    <record id="entity_aly_waha" model="aly.entity">
+        <field name="name">Al Waha Residence</field>
+        <field name="code">WAH</field>
+        <field name="entity_type">compound</field>
+        <field name="street">Prince Sultan Road</field>
+        <field name="city">Jeddah</field>
+        <field name="country_id" ref="base.sa"/>
+        <field name="manager_id" ref="employee_aly_khalid"/>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/entity_yasmin.jpg"/>
+    </record>
+
+    <record id="unit_aly_a202" model="aly.entity.unit">
+        <field name="name">A-202</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="floor">2</field>
+        <field name="area">115</field>
+        <field name="rooms">2</field>
+        <field name="yearly_rent">62000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_living.jpg"/>
+    </record>
+    <record id="unit_aly_a302" model="aly.entity.unit">
+        <field name="name">A-302</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="floor">3</field>
+        <field name="area">150</field>
+        <field name="rooms">3</field>
+        <field name="yearly_rent">70000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_bedroom.jpg"/>
+    </record>
+    <record id="unit_aly_a401" model="aly.entity.unit">
+        <field name="name">A-401</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="floor">4</field>
+        <field name="area">165</field>
+        <field name="rooms">4</field>
+        <field name="is_for_sale" eval="True"/>
+        <field name="yearly_rent">75000</field>
+        <field name="sale_price">1100000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_tower.jpg"/>
+    </record>
+    <record id="unit_aly_a501" model="aly.entity.unit">
+        <field name="name">A-501</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="floor">5</field>
+        <field name="area">180</field>
+        <field name="rooms">4</field>
+        <field name="is_for_rent" eval="False"/>
+        <field name="is_for_sale" eval="True"/>
+        <field name="sale_price">1300000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_living.jpg"/>
+    </record>
+    <record id="unit_aly_a601" model="aly.entity.unit">
+        <field name="name">A-601</field>
+        <field name="entity_id" ref="entity_aly_nakheel"/>
+        <field name="floor">6</field>
+        <field name="area">210</field>
+        <field name="rooms">5</field>
+        <field name="yearly_rent">90000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_tower.jpg"/>
+    </record>
+
+    <record id="unit_aly_v04" model="aly.entity.unit">
+        <field name="name">V-04</field>
+        <field name="entity_id" ref="entity_aly_yasmin"/>
+        <field name="floor">0</field>
+        <field name="area">360</field>
+        <field name="rooms">5</field>
+        <field name="is_for_sale" eval="True"/>
+        <field name="yearly_rent">135000</field>
+        <field name="sale_price">2500000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_villa.jpg"/>
+    </record>
+
+    <record id="unit_aly_g02" model="aly.entity.unit">
+        <field name="name">G-02</field>
+        <field name="entity_id" ref="entity_aly_business"/>
+        <field name="unit_type">commercial</field>
+        <field name="floor">0</field>
+        <field name="area">85</field>
+        <field name="rooms">1</field>
+        <field name="yearly_rent">110000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_shop.jpg"/>
+    </record>
+    <record id="unit_aly_o202" model="aly.entity.unit">
+        <field name="name">O-202</field>
+        <field name="entity_id" ref="entity_aly_business"/>
+        <field name="unit_type">commercial</field>
+        <field name="floor">2</field>
+        <field name="area">80</field>
+        <field name="rooms">2</field>
+        <field name="yearly_rent">52000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_office.jpg"/>
+    </record>
+    <record id="unit_aly_o301" model="aly.entity.unit">
+        <field name="name">O-301</field>
+        <field name="entity_id" ref="entity_aly_business"/>
+        <field name="unit_type">commercial</field>
+        <field name="floor">3</field>
+        <field name="area">70</field>
+        <field name="rooms">2</field>
+        <field name="yearly_rent">50000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_office.jpg"/>
+    </record>
+
+    <record id="unit_aly_w01" model="aly.entity.unit">
+        <field name="name">W-01</field>
+        <field name="entity_id" ref="entity_aly_waha"/>
+        <field name="floor">0</field>
+        <field name="area">125</field>
+        <field name="rooms">3</field>
+        <field name="yearly_rent">48000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_villa.jpg"/>
+    </record>
+    <record id="unit_aly_w02" model="aly.entity.unit">
+        <field name="name">W-02</field>
+        <field name="entity_id" ref="entity_aly_waha"/>
+        <field name="floor">1</field>
+        <field name="area">130</field>
+        <field name="rooms">3</field>
+        <field name="is_for_sale" eval="True"/>
+        <field name="yearly_rent">50000</field>
+        <field name="sale_price">780000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_living.jpg"/>
+    </record>
+    <record id="unit_aly_w03" model="aly.entity.unit">
+        <field name="name">W-03</field>
+        <field name="entity_id" ref="entity_aly_waha"/>
+        <field name="floor">2</field>
+        <field name="area">140</field>
+        <field name="rooms">3</field>
+        <field name="yearly_rent">52000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/room_bedroom.jpg"/>
+    </record>
+    <record id="unit_aly_w04" model="aly.entity.unit">
+        <field name="name">W-04</field>
+        <field name="entity_id" ref="entity_aly_waha"/>
+        <field name="floor">3</field>
+        <field name="area">145</field>
+        <field name="rooms">4</field>
+        <field name="yearly_rent">55000</field>
+        <field name="image_1920" type="base64" file="aly_entity_management/static/img/demo/unit_villa.jpg"/>
+    </record>
+
+    <function model="aly.entity.demo" name="_aly_load_demo_scenarios"/>
+
+</odoo>

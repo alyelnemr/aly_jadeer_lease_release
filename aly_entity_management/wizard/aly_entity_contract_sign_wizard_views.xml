@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="aly_entity_contract_sign_wizard_view_form" model="ir.ui.view">
+        <field name="name">aly.entity.contract.sign.wizard.view.form</field>
+        <field name="model">aly.entity.contract.sign.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Customer Signature">
+                <p>
+                    By signing, the customer accepts contract
+                    <field name="contract_id" readonly="1" class="fw-bold" options="{'no_open': True}"/>
+                    for a full value of
+                    <field name="total_amount" class="fw-bold"/>.
+                    <field name="currency_id" invisible="1"/>
+                </p>
+                <group>
+                    <field name="signed_by"/>
+                    <field name="signature" widget="signature" options="{'full_name': 'signed_by'}"/>
+                </group>
+                <footer>
+                    <button name="action_sign" type="object" string="Sign" class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <record id="seq_aly_entity_reservation" model="ir.sequence">
+        <field name="name">Real Estate Reservation</field>
+        <field name="code">aly.entity.reservation</field>
+        <field name="prefix">RES/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_aly_entity_contract" model="ir.sequence">
+        <field name="name">Real Estate Contract</field>
+        <field name="code">aly.entity.contract</field>
+        <field name="prefix">CON/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="seq_aly_entity_maintenance_request" model="ir.sequence">
+        <field name="name">Real Estate Maintenance Request</field>
+        <field name="code">aly.entity.maintenance.request</field>
+        <field name="prefix">MNT/%(year)s/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>
